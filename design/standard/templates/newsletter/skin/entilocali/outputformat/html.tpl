@@ -89,7 +89,7 @@
           {/if}
           
           {if $appuntamenti}                    
-              <h2 style="color: #404040 !important; font-family: georgia,serif;font-size: 1.7em;font-weight: normal;line-height: 0.9;padding:0;margin:24px 28px 6px; text-align: left;">                
+              <h2 style="color: #404040 !important; font-family: georgia,serif;font-size: 1.7em;font-weight: normal;line-height: 1.5;padding:0;margin:24px 28px 6px; text-align: left;">                
                 Appuntamenti
               </h2>
               {switch match=$appuntamenti|count()}

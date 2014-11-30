@@ -1,8 +1,8 @@
 <table cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
   <tr>
-    <td rowspan="2" bgcolor="#222222">
+    <td rowspan="2" bgcolor="#222222" style="padding:20px 20px 0">
       <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}" title="{ezini( 'SiteSettings', 'SiteName' )}">
-        <img style="border: none; padding: 20px 20px 0; display: block; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;"
+        <img style="border: none; display: block; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;"
              src={$ente.data_map.stemma.content['logo'].url|ezroot}                              
              alt="{ezini( 'SiteSettings', 'SiteName' )}" />
       </a>
