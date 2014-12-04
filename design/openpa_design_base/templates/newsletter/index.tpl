@@ -4,10 +4,12 @@
 
 <div class="global-view-full">
     
-    <div class="block">
+    {*
+	<div class="block">
         Pannello di controllo &middot;
         <a href={'/newsletter/user_list/'|ezurl}>Utenti iscritti alla newsletter</a>
     </div>
+	*}
 
     <h1 class="context-title">{'Newsletter dashboard'|i18n( 'cjw_newsletter/index' )}</a></h1>
            
@@ -20,9 +22,11 @@
                                                       'sort_by', array( 'name', true() ),
                                                      ))}
     {foreach $newsletter_system_node_list as $newsletter_system_node}
-        {include uri='design:newsletter/index_newsletter_system_info_box.tpl'
+        {if $newsletter_system_node.can_create}
+		{include uri='design:newsletter/index_newsletter_system_info_box.tpl'
                  name='NlSystemBox'
                  newsletter_system_node=$newsletter_system_node}
+		{/if}
     {/foreach}
 
     {undef $newsletter_system_node_list}
@@ -30,7 +34,7 @@
 
 
 
-    {* last actions *}
+    {* last actions 
 
     {def $last_edition_node_list = fetch( 'content', 'tree',
                                                             hash( 'parent_node_id', $newsletter_root_node_id,
@@ -67,5 +71,6 @@
                 </div>
         </div>
     </div>
+	*}
 </div>
 

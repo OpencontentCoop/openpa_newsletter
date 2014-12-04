@@ -1,6 +1,6 @@
 <div class="block">
 
-        <h2>{$newsletter_system_node.name|wash()}</h2>
+        <h2>{$newsletter_system_node.name|wash()}</h2>		
         {def $newsletter_list_node_list = fetch('content', 'list',
                                                                 hash( 'parent_node_id', $newsletter_system_node.node_id,
                                                                       'class_filter_type', 'include',
@@ -21,6 +21,7 @@
                     </form>
                     {/if}
                     {'cjw_newsletter_list'|class_icon( 'small' )} {$newsletter_list_node.name|wash()} / {$newsletter_list_node.data_map.title.content|wash()}
+					<strong><a href={concat('newsletter/subscription_list/',$newsletter_list_node.node_id)|ezurl()}>[Utenti iscritti]</a></strong>
                 </th>
             </tr>
 
