@@ -2,8 +2,12 @@
   <tr>
     <td bgcolor="#154985">
       <a style="display: block;width: 660px;overflow: hidden" href="http://{ezini( 'SiteSettings', 'SiteURL' )}" title="{ezini( 'SiteSettings', 'SiteName' )}">
-        <img style="border: none; padding: 20px 20px 0 0; display: block; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;"
-             src={$ente.data_map.logo.content['header_logo'].url|ezroot}                              
+        <img style="border: none; padding: 20px 20px 0 0; display: block; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;"             
+		    {if and( is_set( $ente.data_map.logo ), openpaini( 'Newsletter', 'SkinUseHomepageLogo', 'enabled' )|eq( 'enabled' ) )}
+			  src={$ente.data_map.logo.content['header_logo'].url|ezroot}
+			{else}
+			  src={'newsletter_logo.png'|ezimage}
+			{/if}
              alt="{ezini( 'SiteSettings', 'SiteName' )}" />
       </a>
     </td>    
