@@ -13,7 +13,6 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
         OpenPALog::warning( 'Installazione estensioni' );
         $block = 'ExtensionSettings';
         $settingName = 'ActiveAccessExtensions';
-        $value = array( 'cjw_newsletter', 'openpa_newsletter' );
         $iniFile = "site.ini";
 
         $frontend = OpenPABase::getFrontendSiteaccessName();
@@ -22,6 +21,7 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
 
         foreach( array( $frontend, $backend, $debug ) as $siteAccessName )
         {
+            $value = array( 'cjw_newsletter', 'openpa_newsletter' );
             $path = "settings/siteaccess/{$siteAccessName}/";
             $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );
             $value = array_unique( array_merge( (array) $ini->variable( $block, $settingName ), $value ) );
@@ -32,7 +32,13 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
 
         //installa classi
         OpenPALog::warning( 'Installazione classi' );
-        OpenPAClassTools::installClasses( array( 'cjw_newsletter_article', 'cjw_newsletter_edition', 'cjw_newsletter_list', 'cjw_newsletter_root', 'cjw_newsletter_system' ) );
+        OpenPAClassTools::installClasses( array(
+            'cjw_newsletter_article',
+            'cjw_newsletter_edition',
+            'cjw_newsletter_list',
+            'cjw_newsletter_root',
+            'cjw_newsletter_system'
+        ) );
 
         //installa sezione
         OpenPALog::warning( 'Installazione sezione' );
@@ -45,34 +51,46 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
             throw new Exception( "Errore in creazione App section" );
         }
 
-        OpenPALog::warning( 'Creazione Root' );
-        $params = array(
-            'parent_node_id' => $parentNode->attribute( 'node_id' ),
-            'section_id' => $section->attribute( 'id' ),
-            'class_identifier' => 'cjw_newsletter_root',
-            'attributes' => array(
-                'title' => 'Newsletter'
-            )
-        );
-        /** @var eZContentObject $contentObject */
-        $contentObject = eZContentFunctions::createAndPublishObject( $params );
+        $rootRemoteId = OpenPABase::getCurrentSiteaccessIdentifier() . '_newsletter_root';
+        $contentObject = eZContentObject::fetchByRemoteID( $rootRemoteId );
+        if( !$contentObject instanceof eZContentObject )
+        {
+            OpenPALog::warning( 'Creazione Root' );
+            $params = array(
+                'remote_id' => $rootRemoteId,
+                'parent_node_id' => $parentNode->attribute( 'node_id' ),
+                'section_id' => $section->attribute( 'id' ),
+                'class_identifier' => 'cjw_newsletter_root',
+                'attributes' => array(
+                    'title' => 'Newsletter'
+                )
+            );
+            /** @var eZContentObject $contentObject */
+            $contentObject = eZContentFunctions::createAndPublishObject( $params );
+        }
         if( !$contentObject instanceof eZContentObject )
         {
             throw new Exception( 'Errore in creazione Newsletter Root' );
         }
         $rootNode = $contentObject->attribute( 'main_node' );
 
-        OpenPALog::warning( 'Creazione System' );
-        $params = array(
-            'parent_node_id' => $rootNode->attribute( 'node_id' ),
-            'section_id' => $section->attribute( 'id' ),
-            'class_identifier' => 'cjw_newsletter_system',
-            'attributes' => array(
-                'title' => 'Newsletter system'
-            )
-        );
-        /** @var eZContentObject $contentObject */
-        $contentObject = eZContentFunctions::createAndPublishObject( $params );
+        $systemRemoteId = OpenPABase::getCurrentSiteaccessIdentifier() . '_newsletter_system';
+        $contentObject = eZContentObject::fetchByRemoteID( $systemRemoteId );
+        if( !$contentObject instanceof eZContentObject )
+        {
+            OpenPALog::warning( 'Creazione System' );
+            $params = array(
+                'remote_id' => $systemRemoteId,
+                'parent_node_id' => $rootNode->attribute( 'node_id' ),
+                'section_id' => $section->attribute( 'id' ),
+                'class_identifier' => 'cjw_newsletter_system',
+                'attributes' => array(
+                    'title' => 'Newsletter system'
+                )
+            );
+            /** @var eZContentObject $contentObject */
+            $contentObject = eZContentFunctions::createAndPublishObject( $params );
+        }
         if( !$contentObject instanceof eZContentObject )
         {
             throw new Exception( 'Errore in creazione Newsletter System' );
@@ -104,8 +122,19 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
         $ini->setVariable( 'NewsletterMailSettings', 'EmailSubjectPrefix', "[" . eZINI::instance()->variable( 'SiteSettings', 'SiteName' ) . "]" );
         if ( !$ini->save() ) throw new Exception( "Non riesco a salvare cjw_newsletter.ini" );
 
-        eZFileHandler::symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$frontend}/{$iniFile}.append.php" );
-        eZFileHandler::symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$debug}/{$iniFile}.append.php" );
+        symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$frontend}/{$iniFile}.append.php" );
+        symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$debug}/{$iniFile}.append.php" );
+
+        $path = "settings/siteaccess/{$backend}/";
+        $iniFile = "contentstructuremenu.ini";
+        $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );
+        $value = array_unique( array_merge( (array) $ini->variable( 'TreeMenu', 'ShowClasses' ), array( 'cjw_newsletter_root' ) ) );
+        $ini->setVariable( 'TreeMenu', 'ShowClasses', $value );
+        if ( !$ini->save() ) throw new Exception( "Non riesco a salvare contentstructuremenu.ini" );
+
+
+        eZCache::clearById( 'global_ini' );
+        eZCache::clearById( 'template' );
 
     }
 }
