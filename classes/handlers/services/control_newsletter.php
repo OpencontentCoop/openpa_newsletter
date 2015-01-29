@@ -9,6 +9,11 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
 
     public static function init( $options = array() )
     {
+        OpenPALog::warning( 'Installazione schema db' );
+        $db = eZDB::instance();
+        $schema = 'extension/cjw_newsletter/sql/postgresql/schema.sql';
+        OpenPADBTools::insertFromSqlFile( $db, $schema );
+
         //installa estensioni
         OpenPALog::warning( 'Installazione estensioni' );
         $block = 'ExtensionSettings';
@@ -120,7 +125,6 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
         $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );
         $ini->setVariable( 'NewsletterSettings', 'RootFolderNodeId', $rootNode->attribute( 'node_id' ) );
         $ini->setVariable( 'NewsletterMailSettings', 'EmailSubjectPrefix', "[" . eZINI::instance()->variable( 'SiteSettings', 'SiteName' ) . "]" );
-        $ini->setVariable( 'NewsletterMailSettings', 'EmailSenderName', eZINI::instance()->variable( 'SiteSettings', 'SiteName' ) );
         if ( !$ini->save() ) throw new Exception( "Non riesco a salvare cjw_newsletter.ini" );
 
         symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$frontend}/{$iniFile}.append.php" );
