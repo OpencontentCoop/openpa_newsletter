@@ -64,4 +64,16 @@
 {'To unsubscribe from this newsletter please visit the following link'|i18n('cjw_newsletter/skin/default')}:
 url:{'/newsletter/unsubscribe/#_hash_unsubscribe_#'|ezurl('no')}
 <br />
+
+{if and( is_set( $main_node.parent.data_map.footer_link), $main_node.parent.data_map.footer_link.has_content )}
+{foreach $main_node.parent.data_map.footer_link.content.relation_list as $relation}  
+  {def $related = fetch( content, object, hash( object_id, $relation.contentobject_id ) )}        
+    {$related.name}: http://{concat($site_url, $related.main_node.url_alias|ezurl('no'))}
+  {delimiter} <br /> {/delimiter}
+  {undef $related}
+{/foreach}
+{/if}
+<br />
+
+
 &copy; {currentdate()|datetime( 'custom', '%Y' )} {$site_url}

@@ -120,6 +120,7 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
         $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );
         $ini->setVariable( 'NewsletterSettings', 'RootFolderNodeId', $rootNode->attribute( 'node_id' ) );
         $ini->setVariable( 'NewsletterMailSettings', 'EmailSubjectPrefix', "[" . eZINI::instance()->variable( 'SiteSettings', 'SiteName' ) . "]" );
+        $ini->setVariable( 'NewsletterMailSettings', 'EmailSenderName', eZINI::instance()->variable( 'SiteSettings', 'SiteName' ) );
         if ( !$ini->save() ) throw new Exception( "Non riesco a salvare cjw_newsletter.ini" );
 
         symlink( eZSys::rootDir() . "/settings/siteaccess/{$backend}/{$iniFile}.append.php", eZSys::rootDir() . "/settings/siteaccess/{$frontend}/{$iniFile}.append.php" );
