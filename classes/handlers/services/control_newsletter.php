@@ -12,7 +12,14 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
         OpenPALog::warning( 'Installazione schema db' );
         $db = eZDB::instance();
         $schema = 'extension/cjw_newsletter/sql/postgresql/schema.sql';
-        OpenPADBTools::insertFromSqlFile( $db, $schema );
+        try
+        {
+            OpenPADBTools::insertFromSqlFile( $db, $schema );
+        }
+        catch( Exception $e )
+        {
+            OpenPALog::notice( $e->getMessage() );
+        }
 
         //installa estensioni
         OpenPALog::warning( 'Installazione estensioni' );
