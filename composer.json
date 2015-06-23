@@ -1,0 +1,20 @@
+{
+    "name": "opencontent/openpa_newsletter-ls",
+    "description": "OpenContent OpenPA Newsletter",
+    "type": "ezpublish-legacy-extension",
+    "authors": [        
+        {
+            "name": "OpenContent",
+            "homepage": "http://www.opencontent.it"
+        }
+    ],
+    "license": "GPL-2.0",    
+    "minimum-stability": "dev",
+    "require": {
+        "ezsystems/ezpublish-legacy-installer": "*",
+        "opencontent/cjwnewsletter-ls": "*"
+    },
+    "extra": {
+        "ezpublish-legacy-extension-name": "openpa_newsletter"
+    }
+}
