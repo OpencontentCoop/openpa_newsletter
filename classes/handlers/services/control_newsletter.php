@@ -44,6 +44,9 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
 
         //installa classi
         OpenPALog::warning( 'Installazione classi' );
+        // in prototipo non sono installati i datatype di newsletter si esgue perciò la sincroizazione da un altro sito (terlago)
+        $defaultRemoteUrl = OpenPAClassTools::$remoteUrl;
+        OpenPAClassTools::$remoteUrl = 'http://www.comune.terlago.tn.it/openpa/classdefinition/';
         OpenPAClassTools::installClasses( array(
             'cjw_newsletter_article',
             'cjw_newsletter_edition',
@@ -51,6 +54,7 @@ class ObjectHandlerServiceControlNewsletter extends ObjectHandlerServiceBase
             'cjw_newsletter_root',
             'cjw_newsletter_system'
         ) );
+        OpenPAClassTools::$remoteUrl = $defaultRemoteUrl;
 
         //installa sezione
         OpenPALog::warning( 'Installazione sezione' );

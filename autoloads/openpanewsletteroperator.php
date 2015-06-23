@@ -49,7 +49,7 @@ class OpenPANewsletterOperator
                     $checkAccess = $result['accessWord'] != 'no';
                     
                     $editionDraftCount = eZContentObjectTreeNode::subTreeCountByNodeID( $fetchParams,
-                                                                                        eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+                                                                                        eZINI::instance( 'cjw_newsletter.ini' )->variable( 'NewsletterSettings', 'RootFolderNodeId' ) );
                     
                     $classAllowed = in_array( $currentNode->attribute( 'class_identifier' ), self::$allowedClasses );
                     
@@ -62,8 +62,7 @@ class OpenPANewsletterOperator
             case 'newsletter_edition_hash':
             {
                 $editionDraftNodeList = eZContentObjectTreeNode::subTreeByNodeID( $fetchParams,
-                                                                                  eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
-                
+                                                                                  eZINI::instance( 'cjw_newsletter.ini' )->variable( 'NewsletterSettings', 'RootFolderNodeId' ) );                
                 $selectHash = array();
                 foreach( $editionDraftNodeList as $edition )
                 {
