@@ -1,4 +1,4 @@
-<h2 style="color: #404040 !important;font-family: arial,serif;font-size: 1.6em;font-weight: normal;line-height: 0.9;padding:0;margin:0;">
+<h2 style="color: #404040 !important;font-family: arial,serif;font-size: 1.6em;font-weight: normal;padding:0;margin:0;">
 {$item.name|wash()}
 </h2>
 
