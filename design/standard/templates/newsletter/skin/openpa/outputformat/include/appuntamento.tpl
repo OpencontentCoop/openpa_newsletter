@@ -11,7 +11,7 @@
     {set $same_day = true()}
 {/if} 
 
-<h2 style="color: #404040 !important;font-family: arial,serif;font-size: 1.2em;font-weight: bold;padding:0;margin:0;">
+<h2 style="color: #404040 !important;font-family: arial,serif;font-size: 1.2em;font-weight: bold;line-height: 1;padding:0;margin:0;">
 {$item.name|wash()}
 </h2>
 
