@@ -35,7 +35,7 @@
 </head>
 <body style="width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;">
 
-<p style="color:#666666;font-family:arial,helvetica,sans-serif;font-size:11px;text-align:center">Non visualizzi correttamente questa email? <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/newsletter/archive/#_hash_newsletter_#">Leggila sul sito</a></p>
+<p style="color:#666666;font-family:arial,helvetica,sans-serif;font-size:11px;text-align:center">Non visualizzi correttamente questa email? <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/newsletter/archive/#_hash_edition_#">Leggila sul sito</a></p>
 
 <table style="background-color: #D2D3D7; font-family: helvetica, arial, sans-serif; font-size: 12px; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; margin:0; padding:0; width:100% !important; line-height: 100% !important;" cellpadding="0" cellspacing="0" border="0" id="backgroundTable">
   {def $edition_data_map = $contentobject.data_map}
