@@ -28,7 +28,10 @@ class OpenPANewsletterOperator
     
     function modify( &$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters )
     {
-		eZDB::setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
+		if ( !eZContentClass::classIDByIdentifier( 'cjw_newsletter_edition'  ) )
+            return false;
+        
+        eZDB::setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
 
         try
         {
@@ -48,7 +51,7 @@ class OpenPANewsletterOperator
 
                 case 'can_add_to_newsletter':
                 {
-                    $canAdd = false;
+                    $canAdd = false;                    
                     $currentNode = $operatorValue;
 
                     if ( $currentNode instanceof eZContentObjectTreeNode )
@@ -105,7 +108,7 @@ class OpenPANewsletterOperator
             $operatorValue = null;
         }
 
-        eZDB::setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
+        eZDB::setErrorHandling( eZDB::ERROR_HANDLING_STANDARD );
     }
 }
 
