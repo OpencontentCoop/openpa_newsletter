@@ -6,9 +6,17 @@
     <p style="font-size: 0.9em;margin: 4px 0 0;">{attribute_view_gui attribute=$item.data_map.publish_date}</p>
 {/if}
 
-{$item.data_map.description.content.output.output_text}
+{def $description = false()}
+{if is_set($item.data_map.description)}
+  {set $description = $item.data_map.description}
+{elseif is_set($item.data_map.short_description)}
+  {set $description = $item.data_map.short_description}
+{/if}
 
-{def $embeds = $item.data_map.description.content.output.output_text|search_embed()}
+{if $description}
+{$description.content.output.output_text}
+
+{def $embeds = $description.content.output.output_text|search_embed()}
 
 {foreach $embeds as $embed}
     {def $oembed = get_oembed_object($embed)}
@@ -17,4 +25,6 @@
     {/if}
 {/foreach}
 
+{/if}
 
+{undef $description}
