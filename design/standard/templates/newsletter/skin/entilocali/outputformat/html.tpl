@@ -4,7 +4,8 @@
 {def $site_url = ezini('SiteSettings', 'SiteURL', 'site.ini')}
 {def $main_node = $contentobject.contentobject.main_node}
 {set-block variable=$subject scope=root}[{$main_node.parent.name|wash()}] {$contentobject.name|wash}{/set-block}
-{def $ente = entelocale_node()}
+{*def $ente = entelocale_node()*}
+{def $ente = fetch( content, node, hash( node_id, ezini('NodeSettings','RootNode','content.ini') ))}
 {def $site_name = cond( $ente, $ente.name|wash(), ezini('SiteSettings','SiteName')|wash() )}
 {def $timestamp=currentdate()}
 {def $notizie=fetch( 'content','list', hash( 'parent_node_id', $main_node.node_id,
