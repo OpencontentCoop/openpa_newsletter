@@ -183,6 +183,10 @@
             <p><em><small>I campi contrassegnati con l'asterisco sono obbligatori</small></em></p>
 
             <div class="block">
+                {if $recaptcha_public_key}
+                    <div class="g-recaptcha" data-sitekey="{$recaptcha_public_key}"></div>
+                    <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl={fetch( 'content', 'locale' ).country_code|downcase}"></script>
+                {/if}
                 <input type="hidden" name="BackUrlInput" value="{cond( ezhttp_hasvariable('BackUrlInput'), ezhttp('BackUrlInput'), 'newsletter/subscribe'|ezurl('no'))}" />
                 <input class="button" disabled="disabled" type="submit" id="SubscribeButton" name="SubscribeButton" value="{'Subscribe'|i18n( 'cjw_newsletter/subscribe' )}" title="{'Add to subscription.'|i18n( 'cjw_newsletter/subscribe' )}" />
                 <a href={$node_url|ezurl}><input class="button" type="submit" name="CancelButton" value="{'Cancel'|i18n( 'cjw_newsletter/subscribe' )}" /></a>
