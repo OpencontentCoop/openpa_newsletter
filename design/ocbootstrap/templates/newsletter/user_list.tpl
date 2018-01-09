@@ -40,7 +40,7 @@ nur nodeobject vom type  cjw_newsletter_list aktzeptieren
 
     <h1 class="context-title">Gestione utenti iscritti alla newsletter</h1>
     
-    <form action={$page_uri|ezurl} name="UserList" method="post">
+    <form action={'newsletter/user_list'|ezurl} name="UserList" method="post">
         <input placeholder="{'Email'|i18n( 'cjw_newsletter/user_list' )}" class="halfbox" type="text" name="SearchUserEmail" value="{if is_set($view_parameters['search_user_email'])}{$view_parameters['search_user_email']}{/if}">
         <input class="defaultbutton" type="submit" name="SubmitUserSearch" value="{'Search for existing user'|i18n( 'cjw_newsletter/user_list' )}">
     </form>{* Created. *}
