@@ -6,7 +6,7 @@ class OpenPANewsletterOperator
     //@todo sposta su ini o su gruppo di classi
     public static $allowedClasses = array( 'avviso', 'comunicato_stampa', 'event' );
 
-    function OpenPANewsletterOperator()
+    function __construct()
     {
         $this->Operators= array( 'can_add_to_newsletter', 'newsletter_edition_hash' );
     }
