@@ -1,9 +1,9 @@
-{set-block variable=$subject scope=root}{ezini('NewsletterMailSettings', 'EmailSubjectPrefix', 'cjw_newsletter.ini')} {$contentobject.name|wash}{/set-block}
+{def $main_node=$contentobject.contentobject.main_node}
+{set-block variable=$subject scope=root}[{$main_node.parent.name|wash()}] {$contentobject.name|wash}{/set-block}
 
 {def $site_url=ezini('SiteSettings', 'SiteURL', 'site.ini')}
 {def $site_name=ezini('SiteSettings', 'SiteName', 'site.ini')}
 
-{def $main_node=$contentobject.contentobject.main_node}
 {def $notizie=fetch( 'content','list', hash( 'parent_node_id', $main_node.node_id,
                                                   'class_filter_type', 'include',
                                                   'class_filter_array', array( 'cjw_newsletter_article' ),                                                  
