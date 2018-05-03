@@ -23,7 +23,14 @@
                                                   'class_filter_array', array( 'event' ),
                                                   'limit', 6,
                                                   'sort_by',$main_node.sort_array
-                                               ))}                                               
+                                               ))}
+
+{def $others=fetch( 'content','list', hash( 'parent_node_id', $main_node.node_id,
+                                                  'class_filter_type', 'exclude',
+                                                  'class_filter_array', array( 'cjw_newsletter_article', 'comunicato_stampa', 'avviso', 'event' ),
+                                                  'limit', 12,
+                                                  'sort_by',$main_node.sort_array
+                                               ))}
 
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -117,7 +124,11 @@
                 {/case}
 
               {/switch}
-          {/if}          
+          {/if}
+
+          {if $others}
+            {include uri='design:newsletter/skin/openpa/outputformat/include/others.tpl' items=$others}
+          {/if}
         </td>
       </tr>
       {* footer *}
