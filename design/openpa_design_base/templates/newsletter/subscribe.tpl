@@ -177,7 +177,7 @@
 
             <div class="block">
                 <label for="Privacy">{'Data Protection'|i18n( 'cjw_newsletter/subscribe' )}*:</label>
-                <input type="checkbox" id="Privacy" /> Dichiaro di essere informato, ai sensi e per gli effetti di cui all’art. 13 del D.Lgs. 196/2003, che i dati personali raccolti saranno trattati, con strumenti cartacei e con strumenti informatici, esclusivamente nell’ambito del procedimento per il quale la presente dichiarazione viene resa e di poter esercitare i diritti di cui all’art. 7 del D.Lgs. 196/2003.
+                <input type="checkbox" id="Privacy" /> Dichiaro di aver preso visione dell'<a href="#informativa">informativa sul trattamento dei dati personali</a>. *
             </div>
 
             <p><em><small>I campi contrassegnati con l'asterisco sono obbligatori</small></em></p>
@@ -204,6 +204,11 @@
                 </p>
             </div>
         </form>
+
+        <div class="square-box-gray" id="informativa">
+            <h2>Informativa sul trattamento dei dati personali</h2>
+            {include uri='design:newsletter/informativa.tpl'}
+        </div>
     {/if}
 
     </div></div></div>
