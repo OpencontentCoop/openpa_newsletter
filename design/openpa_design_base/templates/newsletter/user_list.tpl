@@ -30,6 +30,8 @@ nur nodeobject vom type  cjw_newsletter_list aktzeptieren
  $page_uri = 'newsletter/user_list'}
 
 *}
+
+{def $page_uri = 'newsletter/user_list'}
 <div class="global-view-full">
     
     <div class="block">        
