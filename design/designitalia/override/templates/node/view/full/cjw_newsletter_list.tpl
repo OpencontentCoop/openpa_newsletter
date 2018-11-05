@@ -35,4 +35,5 @@
     {/if}
 </div>
 
+{include uri='design:parts/load_website_toolbar.tpl' current_user=fetch(user, current_user)}
 
