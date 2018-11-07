@@ -12,7 +12,8 @@
     "minimum-stability": "dev",
     "require": {
         "ezsystems/ezpublish-legacy-installer": "*",
-        "opencontent/cjwnewsletter-ls": "*"
+        "opencontent/cjwnewsletter-ls": "*",
+        "opencontent/openpa-ls": "~2.26"
     },
     "extra": {
         "ezpublish-legacy-extension-name": "openpa_newsletter"
