@@ -20,7 +20,14 @@
                                                   'class_filter_array', array( 'event' ),
                                                   'limit', 6,
                                                   'sort_by',$main_node.sort_array
-                                               ))}   
+                                               ))}
+
+{def $others=fetch( 'content','list', hash( 'parent_node_id', $main_node.node_id,
+                                                'class_filter_type', 'exclude',
+                                                'class_filter_array', array( 'cjw_newsletter_article', 'comunicato_stampa', 'avviso', 'event' ),
+                                                'limit', 12,
+                                                'sort_by',$main_node.sort_array
+                                               ))}
 
 <h1>{$main_node.parent.name|wash()} - {$main_node.name|wash()}</h1> 
 {def $timestamp=currentdate()}{$timestamp|l10n('date')}
@@ -49,7 +56,7 @@
 
 {if $appuntamenti}
 <h2>Appuntamenti</h2>
-{foreach $comunicati as $item}
+{foreach $appuntamenti as $item}
 	<h3>{$item.name|wash()}</h3>
 	{attribute_view_gui attribute=$item.data_map.publish_date}
 	{if $item|has_abstract()}          
@@ -57,6 +64,17 @@
     {/if}
 	Vai alla testo completo: {$site_url}{$item.object.main_node.url_alias|ezurl('no')}
 {/foreach}
+{/if}
+
+{if $others}
+    {foreach $others as $item}
+        <h3>{$item.name|wash()}</h3>
+        {attribute_view_gui attribute=$item.data_map.publish_date}
+        {if $item|has_abstract()}
+            {$item|abstract()|openpa_shorten(200)}
+        {/if}
+        Vai alla testo completo: {$site_url}{$item.object.main_node.url_alias|ezurl('no')}
+    {/foreach}
 {/if}
 
 <br />
