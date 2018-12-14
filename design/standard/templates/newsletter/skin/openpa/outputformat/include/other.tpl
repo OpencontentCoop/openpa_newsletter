@@ -10,6 +10,8 @@
     {$item|abstract()|openpa_shorten(200)}
 {/if}
 
-
+<p>
+    <a href="http://{concat($site_url, $item.object.main_node.url_alias|ezurl('no'))}" title="Per saperne di più" style="color: #006699">Per saperne di più</a>
+</p>
 
 
