@@ -1,7 +1,7 @@
 <table cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
   <tr>
     <td bgcolor="#154985">
-        {if and( is_set( $main_node.parent.data_map.banner ), $main_node.parent.data_map.banner.has_content ) )}
+        {if and( is_set( $main_node.parent.data_map.banner ), $main_node.parent.data_map.banner.has_content )}
           <a style="display: block;width: 700px;overflow: hidden" href="http://{ezini( 'SiteSettings', 'SiteURL' )}" title="{ezini( 'SiteSettings', 'SiteName' )}">
             <img style="border: none; padding: 0; display: block; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;"
                  src={$main_node.parent.data_map.banner.content['original'].url|ezroot}
