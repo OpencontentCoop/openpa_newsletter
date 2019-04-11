@@ -13,7 +13,7 @@
     "require": {
         "ezsystems/ezpublish-legacy-installer": "*",
         "opencontent/cjwnewsletter-ls": "*",
-        "opencontent/openpa-ls": ">=2.26"
+        "opencontent/openpa-ls": "*"
     },
     "extra": {
         "ezpublish-legacy-extension-name": "openpa_newsletter"
