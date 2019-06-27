@@ -4,7 +4,7 @@
        $main_width = 658
        $colspan = 3}
     
-  {if $item.data_map.image.has_content}
+  {if $item|has_attribute('image')}
     {set $colspan = 4}
     {set $main_width = 518}
   {/if}
@@ -20,9 +20,9 @@
     <td width="1" bgcolor="#D5D7D5">
       <img border="0" width="1" height="1" style="display:block;margin:0" alt="" src={"images/newsletter/skin/openpa/spacer.gif"|ezdesign()} />
     </td>
-    {if $item.data_map.image.has_content}
+    {if $item|has_attribute('image')}
     <td width="140" valign="top" align="center" style="padding-top: 8px">
-      {attribute_view_gui attribute=$item.data_map.image image_class=newsletter_content use_colorbox=false()}
+      {attribute_view_gui attribute=$item|attribute('image') image_class=newsletter_content use_colorbox=false()}
     </td>
     {/if}
     <td width="{$main_width}" valign="top" align="left">
@@ -50,16 +50,16 @@
        $colspan = 5
   }
 
-  {if $item1.data_map.image.has_content}
+  {if $item1|has_attribute('image')}
     {set $main_width_1 = 189
          $colspan = 6}
-    {if $item2.data_map.image.has_content}
+    {if $item2|has_attribute('image')}
       {* entrambi hanno immagine*}
       {set $main_width_2 = 188
            $colspan = 7}    
     {/if}
   {else}
-    {if $item2.data_map.image.has_content}
+    {if $item2|has_attribute('image')}
       {* solo item2 ha immagine*}
       {set $main_width_2 = 188
            $colspan = 6}    
@@ -75,9 +75,9 @@
     <td width="1" bgcolor="#D5D7D5">
       <img border="0" width="1" height="1" style="display:block;margin:0" alt="" src={"images/newsletter/skin/openpa/spacer.gif"|ezdesign()} />
     </td>
-    {if $item1.data_map.image.has_content}
+    {if $item1|has_attribute('image')}
     <td width="140" valign="top" align="center" style="padding-top: 8px">
-      {attribute_view_gui attribute=$item1.data_map.image image_class=newsletter_content use_colorbox=false()}
+      {attribute_view_gui attribute=$item1|attribute('image') image_class=newsletter_content use_colorbox=false()}
     </td>
     {/if}
     <td width="{$main_width_1}" valign="top" align="left">
@@ -88,9 +88,9 @@
     <td width="1" bgcolor="#D5D7D5">
       <img border="0" width="1" height="1" style="display:block;margin:0" alt="" src={"images/newsletter/skin/openpa/spacer.gif"|ezdesign()} />
     </td>
-    {if $item2.data_map.image.has_content}
+    {if $item2|has_attribute('image')}
     <td width="140" valign="top" align="center" style="padding-top: 8px">
-      {attribute_view_gui attribute=$item2.data_map.image image_class=newsletter_content use_colorbox=false()}
+      {attribute_view_gui attribute=$item2|attribute('image') image_class=newsletter_content use_colorbox=false()}
     </td>
     {/if}
     <td width="{$main_width_2}" valign="top" align="left">
