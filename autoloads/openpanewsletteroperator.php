@@ -22,7 +22,11 @@ class OpenPANewsletterOperator
 
     function namedParameterList()
     {
-        return array();
+        return array(
+             'can_add_to_newsletter' => array(
+                'ignore_ini_classes' => array( 'type' => 'boolean', 'required' => false, 'default' => false ),
+            ),
+        );
     }
     
     function modify( &$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters )
@@ -68,10 +72,14 @@ class OpenPANewsletterOperator
                             );
 
                         }
-                        $classAllowed = in_array(
-                            $currentNode->attribute( 'class_identifier' ),
-                            self::$allowedClasses
-                        );
+                        if ($namedParameters['ignore_ini_classes']){
+                            $classAllowed = true;    
+                        }else{
+                            $classAllowed = in_array(
+                                $currentNode->attribute( 'class_identifier' ),
+                                self::$allowedClasses
+                            );
+                        }
 
                         $canAdd = $checkAccess && $editionDraftCount > 0 && $classAllowed;
                     }

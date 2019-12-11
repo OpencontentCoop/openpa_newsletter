@@ -1,35 +1,34 @@
 <?php
 require 'autoload.php';
 
-$script = eZScript::instance( array( 'description' => ( "OpenPA Sensor Installer \n\n" ),
-                                     'use-session' => false,
-                                     'use-modules' => true,
-                                     'use-extensions' => true ) );
+$script = eZScript::instance(array('description' => ("OpenPA Sensor Installer \n\n"),
+    'use-session' => false,
+    'use-modules' => true,
+    'use-extensions' => true));
 
 $script->startup();
 
-$options = $script->getOptions();
+$installer = new OpenPANewsletterInstaller();
+$options = $installer->setScriptOptions($script);
 $script->initialize();
-$script->setUseDebugAccumulators( true );
+$script->setUseDebugAccumulators(true);
 
 $cli = eZCLI::instance();
 
-OpenPALog::setOutputLevel( OpenPALog::ALL );
+OpenPALog::setOutputLevel(OpenPALog::ALL);
 
-try
-{
+try {
     /** @var eZUser $user */
-    $user = eZUser::fetchByName( 'admin' );
-    eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
+    $user = eZUser::fetchByName('admin');
+    eZUser::setCurrentlyLoggedInUser($user, $user->attribute('contentobject_id'));
 
-    ObjectHandlerServiceControlNewsletter::init( $options );
-
+    $installer->beforeInstall($options);
+    $installer->install();
+    $installer->afterInstall();
 
     $script->shutdown();
-}
-catch( Exception $e )
-{
+} catch (Exception $e) {
     $errCode = $e->getCode();
     $errCode = $errCode != 0 ? $errCode : 1; // If an error has occured, script must terminate with a status other than 0
-    $script->shutdown( $errCode, $e->getMessage() );
+    $script->shutdown($errCode, $e->getMessage());
 }
