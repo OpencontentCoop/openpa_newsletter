@@ -27,54 +27,7 @@
 </section>
 
 <section class="container">
-    {def $summary_text = 'Table of contents'|i18n('bootstrapitalia')
-         $close_text = 'Close'|i18n('bootstrapitalia')}
-    <div class="row {*border-top row-column-border row-column-menu-left attribute-list*}">
-        {*<aside class="col-lg-4">
-            <div class="sticky-wrapper navbar-wrapper">
-                <nav class="navbar it-navscroll-wrapper it-top-navscroll navbar-expand-lg">
-                    <button class="custom-navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-target="#navbarNav">
-                        <span class="it-list"></span> {$summary_text|wash()}
-                    </button>
-                    <div class="navbar-collapsable" id="navbarNav">
-                        <div class="overlay"></div>
-                        <div class="close-div sr-only">
-                            <button class="btn close-menu" type="button">
-                                <span class="it-close"></span> {$close_text|wash()}
-                            </button>
-                        </div>
-                        <a class="it-back-button" href="#">
-                            {display_icon('it-chevron-left', 'svg', 'icon icon-sm icon-primary align-top')}
-                            <span>{$close_text|wash()}</span>
-                        </a>
-                        <div class="menu-wrapper">
-                            <div class="link-list-wrapper menu-link-list">
-                                <h3 class="no_toc">{$summary_text|wash()}</h3>
-                                <ul class="link-list">
-                                    <li class="nav-item active">
-                                        <a class="nav-link active" href="#state"><span>{'Edition State'|i18n( 'cjw_newsletter/cjw_newsletter_edition_status' )}</span></a>
-                                    </li>
-                                    
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#contents"><span>Contenuti</span></a>
-                                    </li>
-
-                                    {if $newsletter_edition_status|ne('draft')}                                        
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#send_statistic"><span>{'Newsletter Edition send out statistic'|i18n( 'cjw_newsletter/cjw_newsletter_edition_send_statistic' )}</span></a>
-                                        </li>                                           
-                                    {else}                                        
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#send"><span>{"Send Test Newsletter at"|i18n("cjw_newsletter/send")}</span></a>
-                                        </li>
-                                    {/if}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-        </aside>*}
+    <div class="row">
         <section class="col-lg-12">
             <article id="state" class="it-page-section mb-4 anchor-offset">
                 <h4>{'Edition State'|i18n( 'cjw_newsletter/cjw_newsletter_edition_status' )}</h4>
@@ -109,12 +62,6 @@
                     {include uri="design:includes/cjwnewsletteredition_preview_archive.tpl" newsletter_edition_attribute=$newsletter_edition_attribute show_iframes=true() iframe_height="800"}
                 {else}
                     {include uri="design:includes/cjwnewsletteredition_preview.tpl" newsletter_edition_attribute=$newsletter_edition_attribute show_iframes=true() iframe_height="800"}
-                    <form action={'newsletter/send'|ezurl()}  method="post">
-                        <input type="hidden" name="TopLevelNode" value="{$node.object.main_node_id}" /><input type="hidden" name="ContentNodeID" value="{$node.node_id}" /><input type="hidden" name="ContentObjectID" value="{$node.object.id}" /><input type="hidden" name="mail_newsletter" value="true" />
-                        {if $node.data_map.newsletter_edition.content.is_draft}
-                            <input class="btn btn-success float-right" type="submit" name="SendNewsletterButton" value="{"Send Newsletter"|i18n("cjw_newsletter/send")}" />
-                        {/if}
-                    </form>
                 {/if}
             </article>
 
@@ -176,20 +123,36 @@
             {else}                                
 
                 <article id="send" class="it-page-section mb-4 anchor-offset">
-                    <h4>{'Send Test Newsletter at'|i18n( 'cjw_newsletter/send' )}</h4>
-                    <form action={'newsletter/send'|ezurl()} method="post">
-                        
-                        <input type="hidden" name="TopLevelNode" value="{$node.object.main_node_id}" />
-                        <input type="hidden" name="ContentNodeID" value="{$node.node_id}" />
-                        <input type="hidden" name="ContentObjectID" value="{$node.object.id}" />
-                        <input type="hidden" name="mail_newsletter" value="true" />
-                        <div class="input-group">
-                            <input class="form-control" type="text" name="EmailReseiverTestInput" value="{$email_receiver_test}" />
-                            <div class="input-group-append">
-                                <input type="submit" class="btn btn-info" name="SendNewsletterTestButton" value="{"Send Test Newsletter"|i18n("cjw_newsletter/send")}" />
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            {if and(ezini_hasvariable('GeneralSettings', 'EnableSendy', 'sendy.ini'), ezini('GeneralSettings', 'EnableSendy', 'sendy.ini')|eq('enabled'))}
+                                {include uri='design:sendy/create_campaign.tpl' newsletter_edition_attribute=$newsletter_edition_attribute}
+                            {else}
+                                <form action={'newsletter/send'|ezurl()}  method="post">
+                                    <input type="hidden" name="TopLevelNode" value="{$node.object.main_node_id}" /><input type="hidden" name="ContentNodeID" value="{$node.node_id}" /><input type="hidden" name="ContentObjectID" value="{$node.object.id}" /><input type="hidden" name="mail_newsletter" value="true" />
+                                    {if $node.data_map.newsletter_edition.content.is_draft}
+                                        <input class="btn btn-success" type="submit" name="SendNewsletterButton" value="{"Send Newsletter"|i18n("cjw_newsletter/send")}" />
+                                    {/if}
+                                </form>
+                            {/if}
                         </div>
-                    </form>
+
+                        <div class="col">
+                            <form action={'newsletter/send'|ezurl()} method="post">
+
+                                <input type="hidden" name="TopLevelNode" value="{$node.object.main_node_id}" />
+                                <input type="hidden" name="ContentNodeID" value="{$node.node_id}" />
+                                <input type="hidden" name="ContentObjectID" value="{$node.object.id}" />
+                                <input type="hidden" name="mail_newsletter" value="true" />
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="EmailReseiverTestInput" value="{$email_receiver_test}" />
+                                    <div class="input-group-append">
+                                        <input type="submit" class="btn btn-info" name="SendNewsletterTestButton" value="{"Send Test Newsletter"|i18n("cjw_newsletter/send")}" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </article>
             {/if}
 
