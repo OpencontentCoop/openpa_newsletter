@@ -59,7 +59,7 @@
             var form = $(this);
             var data = form.serializeArray();
             $.ez('newsletter::subscribe', data, function (response) {
-                form.prepend('<div style="z-index: 10" class="position-absolute h-100 w-100 alert alert-dismissible fade show alert-'+response.code+' bg-white text-'+response.code+'">'+response.text+
+                form.prepend('<div style="z-index: 10;min-height: 100%" class="position-absolute w-100 alert alert-dismissible fade show alert-'+response.code+' bg-white text-'+response.code+'">'+response.text+
                     '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
             });
             e.preventDefault();
