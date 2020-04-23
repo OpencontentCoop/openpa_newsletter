@@ -209,7 +209,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
         $responseCode = self::STATUS_SUCCESS;
         $responseMessages = [];
-        $responseText = "Campagna creata con successo: ora puoi inviare la newsletter da " . $generalSettings['ApiUrl'];
+        $responseText = "Campagna creata con successo: ora puoi inviare la newsletter da " . $generalSettings['ApiUrl'] . ". Dopo averla inviata clicca sul bottone 'Segna come inviata' per archiviare questa newsletter";
         $errorText = "Errore elaborando la richiesta: contatta il supporto";
 
         try {
@@ -237,7 +237,6 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $emailSender = $listAttributeContent->attribute('email_sender');
                 $emailSenderName = $listAttributeContent->attribute('email_sender_name');
                 $emailReplyTo = $listAttributeContent->attribute('email_reply_to');
-                $emailReturnPath = $listAttributeContent->attribute('email_return_path');
 
                 $sendObject = new CjwNewsletterEditionSend(['output_xml' => $outputXml]);
                 $outputFormatStringArray = $sendObject->getParsedOutputXml();
@@ -286,7 +285,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $context = stream_context_create($opts);
                 $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/campaigns/create.php', false, $context);
 
-                if (strpos($response, 'Campaign created') === false){
+                if (strpos($response, 'Campaign created') === false) {
                     $responseCode = self::STATUS_ERROR;
                     $responseText = $response;
                 }
@@ -294,6 +293,64 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
             } else {
                 throw new Exception('Configuration Error');
             }
+        } catch (Exception $e) {
+            $responseCode = self::STATUS_ERROR;
+            $responseMessages = [$e->getMessage()];
+            $responseText = $errorText;
+            eZDebug::writeError($e->getMessage(), __METHOD__);
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'code' => $responseCode,
+            'messages' => $responseMessages,
+            'text' => $responseText
+        ]);
+        eZExecution::cleanExit();
+    }
+
+    public static function archive()
+    {
+        $http = eZHTTPTool::instance();
+
+        $ini = eZINI::instance('sendy.ini');
+        $generalSettings = $ini->group('GeneralSettings');
+
+        $responseCode = self::STATUS_SUCCESS;
+        $responseMessages = [];
+        $responseText = "";
+        $errorText = "Errore elaborando la richiesta: contatta il supporto";
+
+        try {
+            $canSend = eZUser::currentUser()->hasAccessTo('newsletter', 'send');
+            if ($canSend['accessWord'] != 'yes') {
+                throw new Exception('Unauthorized');
+            }
+
+            if ($generalSettings['EnableSendy'] == 'enabled') {
+                $attributeId = (int)$http->postVariable('id');
+                $attributeVersion = (int)$http->postVariable('version');
+                $attribute = eZContentObjectAttribute::fetch($attributeId, $attributeVersion);
+                if (!$attribute instanceof eZContentObjectAttribute) {
+                    throw new Exception('Edition not found');
+                }
+                if ($attribute->attribute('data_type_string' !== CjwNewsletterEditionType::DATA_TYPE_STRING)) {
+                    throw new Exception('Invalid data');
+                }
+
+                /** @var CjwNewsletterEdition $editionObject */
+                $editionObject = $attribute->attribute('content');
+                /** @var CjwNewsletterEditionSend $sendObject */
+                $sendObject = CjwNewsletterEditionSend::create($editionObject);
+                //$sendObject->setAttribute('status', CjwNewsletterEditionSend::STATUS_ABORT);
+                $sendObject->setAttribute('status', CjwNewsletterEditionSend::STATUS_MAILQUEUE_PROCESS_FINISHED);
+                $sendObject->store();
+                eZContentCacheManager::clearContentCache($attribute->attribute('contentobject_id'));
+
+            } else {
+                throw new Exception('Configuration Error');
+            }
+
         } catch (Exception $e) {
             $responseCode = self::STATUS_ERROR;
             $responseMessages = [$e->getMessage()];
