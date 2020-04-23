@@ -67,3 +67,4 @@
     });
     {/literal}
 </script>
+<style>#informativa * {ldelim}color: #000 !important;{rdelim}</style>
