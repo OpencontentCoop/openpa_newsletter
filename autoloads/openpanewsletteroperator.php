@@ -113,7 +113,7 @@ class OpenPANewsletterOperator
                     {
                         $listNodeCount = 0;
                         if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
-                            $listNodeCount = (array)eZContentObjectTreeNode::subTreeCountByNodeID(
+                            $listNodeCount = eZContentObjectTreeNode::subTreeCountByNodeID(
                                 array(
                                     'ClassFilterType' => 'include',
                                     'ClassFilterArray' => array('cjw_newsletter_list'),
