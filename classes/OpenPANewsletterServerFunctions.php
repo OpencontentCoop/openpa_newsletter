@@ -138,7 +138,10 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         if ($subscribeSettings['Boolean'] == 'true') {
             $postdata['boolean'] = 'true';
         }
-        $opts = array('http' => array('method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)));
+        $opts = [
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+        ];
         $context = stream_context_create($opts);
         $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/subscribe', false, $context);
 
@@ -172,7 +175,10 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
             'list_id' => $list,
             'api_key' => $generalSettings['ApiKey'],
         ];
-        $opts = array('http' => array('method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)));
+        $opts = [
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+        ];
         $context = stream_context_create($opts);
         $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/subscribers/subscription-status.php', false, $context);
 
@@ -281,7 +287,10 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                     'brand_id' => $generalSettings['BrandId'],
                     'api_key' => $generalSettings['ApiKey'],
                 ];
-                $opts = array('http' => array('method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)));
+                $opts = [
+                    'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+                    'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+                ];
                 $context = stream_context_create($opts);
                 $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/campaigns/create.php', false, $context);
 
