@@ -13,11 +13,11 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         $http = eZHTTPTool::instance();
 
         $responseCode = self::STATUS_SUCCESS;
-        $responseText = "Iscrizione effettuata con successo!";
-        $errorText = "Errore elaborando la richiesta: contatta il supporto";
-        $listErrorText = "Errore elaborando la richiesta di iscrizione alla lista";
-        $statusBlacklistedText = "Ci sono dei problemi con l'indirizzo email inserito: in questo momento l'indirizzo è in stato ";
-        $alreadySubscribedText = "L'indirizzo risulta già iscritto alla lista";
+        $responseText = ezpI18n::tr('openpa_newsletter', 'Registration successful!');
+        $errorText = ezpI18n::tr('openpa_newsletter', 'Error processing your request: contact support');
+        $listErrorText = ezpI18n::tr('openpa_newsletter', 'Error processing the request for subscription to the list');
+        $alreadySubscribedText = ezpI18n::tr('openpa_newsletter', 'The address is already registered on the list');
+        $missingListText = ezpI18n::tr('openpa_newsletter', 'At least one list must be selected');
 
         try {
             $ini = eZINI::instance('sendy.ini');
@@ -33,6 +33,10 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $email = $http->hasPostVariable('email') ? $http->postVariable('email') : false;
                 $lists = $http->hasPostVariable('list') ? $http->postVariable('list') : false;
                 $gdpr = $http->hasPostVariable('gdpr');
+
+                if (empty($lists)){
+                    throw new InvalidArgumentException($missingListText);
+                }
 
                 $subscriptionLists = [];
                 if (count($subscribeSettings['ListArray']) > 0) {
@@ -85,7 +89,10 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                                         . ezpI18n::tr('cjw_newsletter/subscribe_success', 'Please note that your subscription is only active if you clicked confirmation link in these email.');
                                     break;
                                 default:
-                                    $texts[] = $statusBlacklistedText . $status['message'];
+                                    $texts[] = ezpI18n::tr('openpa_newsletter',
+                                        'There are problems with the email address entered: at this moment the address is in status %status%', '',
+                                        ['%status%' => $status['message']]
+                                    );
                             }
                         }
                     }
@@ -100,6 +107,11 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
             } else {
                 throw new Exception('Configuration Error');
             }
+        } catch (InvalidArgumentException $e) {
+            $responseCode = self::STATUS_ERROR;
+            $responseMessages = [$e->getMessage()];
+            $responseText = $missingListText;
+            eZDebug::writeError($e->getMessage(), __METHOD__);
         } catch (Exception $e) {
             $responseCode = self::STATUS_ERROR;
             $responseMessages = [$e->getMessage()];
@@ -215,8 +227,11 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
         $responseCode = self::STATUS_SUCCESS;
         $responseMessages = [];
-        $responseText = "Campagna creata con successo: ora puoi inviare la newsletter da " . $generalSettings['ApiUrl'] . ". Dopo averla inviata clicca sul bottone 'Segna come inviata' per archiviare questa newsletter";
-        $errorText = "Errore elaborando la richiesta: contatta il supporto";
+        $responseText = ezpI18n::tr('openpa_newsletter',
+            "Campaign created successfully: now you can send the newsletter from %sendy_api_url%. After sending it, click on the 'Mark as sent' button to archive this newsletter", '',
+            ['%sendy_api_url%' => $generalSettings['ApiUrl']]
+        );
+        $errorText = ezpI18n::tr('openpa_newsletter', 'Error processing your request: contact support');
 
         try {
             $canSend = eZUser::currentUser()->hasAccessTo('newsletter', 'send');
@@ -266,12 +281,12 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $text = str_replace($search, $replace, $outputFormatStringArray[0]['body']['text']);
 
                 $search = [
-                    '<a href="' . $url . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">annulla sottoscrizione</a>',
-                    '<a href="' . str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">annulla sottoscrizione</a>',
+                    '<a href="' . $url . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</a>',
+                    '<a href="' . str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</a>',
                 ];
                 $replace = [
-                    '<unsubscribe>annulla sottoscrizione</unsubscribe>',
-                    '<unsubscribe>annulla sottoscrizione</unsubscribe>',
+                    '<unsubscribe>' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</unsubscribe>',
+                    '<unsubscribe>' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</unsubscribe>',
                 ];
                 $html = str_replace($search, $replace, $outputFormatStringArray[0]['body']['html']);
 
@@ -328,7 +343,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         $responseCode = self::STATUS_SUCCESS;
         $responseMessages = [];
         $responseText = "";
-        $errorText = "Errore elaborando la richiesta: contatta il supporto";
+        $errorText = ezpI18n::tr('openpa_newsletter', 'Error processing your request: contact support');;
 
         try {
             $canSend = eZUser::currentUser()->hasAccessTo('newsletter', 'send');
