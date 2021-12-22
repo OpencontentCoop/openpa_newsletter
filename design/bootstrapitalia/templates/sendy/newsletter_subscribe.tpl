@@ -76,7 +76,7 @@
     $(document).ready(function () {
         $('#sendy-subscribe{/literal}{$id}{literal}').on('submit', function (e) {
             var form = $(this);
-            if ($('input.nl-list:checked').length === 0) {
+            if ($('input.nl-list').length > 0 && $('input.nl-list:checked').length === 0) {
                 e.preventDefault();
                 return false;
             }
