@@ -205,7 +205,7 @@
             <div class="">
                 {if $recaptcha_public_key}
                 <div class="g-recaptcha" data-sitekey="{$recaptcha_public_key}"></div>
-                <script src="https://www.google.com/recaptcha/api.js?hl={fetch( 'content', 'locale' ).country_code|downcase}"></script>
+                <script src="https://www.recaptcha.net/recaptcha/api.js?hl={fetch( 'content', 'locale' ).country_code|downcase}"></script>
                 {/if}
                 <input type="hidden" name="BackUrlInput" value="{cond( ezhttp_hasvariable('BackUrlInput'), ezhttp('BackUrlInput')|wash(), 'newsletter/subscribe'|ezurl('no'))}" />
                 <input id="SubscribeButton" class="Button Button--default u-text-r-xs u-margin-bottom-l u-margin-top-l" disabled="disabled" type="submit" name="SubscribeButton" value="{'Subscribe'|i18n( 'cjw_newsletter/subscribe' )}" title="{'Add to subscription.'|i18n( 'cjw_newsletter/subscribe' )}" />
