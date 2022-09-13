@@ -41,8 +41,8 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $subscriptionLists = [];
                 if (count($subscribeSettings['ListArray']) > 0) {
                     foreach ($subscribeSettings['ListArray'] as $listSetting) {
-                        list($id, $name) = explode(';', $listSetting);
-                        $subscriptionLists[$id] = $name;
+                        list($listId, $listName) = explode(';', $listSetting);
+                        $subscriptionLists[$listId] = $listName;
                     }
                     foreach ($lists as $list) {
                         if (!isset($subscriptionLists[$list])) {
