@@ -3,7 +3,7 @@
 
 {foreach $items as $item}
     
-  {if $item|has_attribute('image')}
+  {if and( is_set($item.data_map.image), $item.data_map.image.has_content, $item.data_map.image.data_type_string|eq('ezimage') )}
     {set $colspan = 4}
     {set $main_width = 518}
   {/if}
@@ -19,9 +19,9 @@
     <td width="1" bgcolor="#D5D7D5">
       <img border="0" width="1" height="1" style="display:block;margin:0" alt="" src={"images/newsletter/skin/openpa/spacer.gif"|ezdesign()} />
     </td>
-    {if $item|has_attribute('image')}
+    {if and( is_set($item.data_map.image), $item.data_map.image.has_content, $item.data_map.image.data_type_string|eq('ezimage') )}
     <td width="140" valign="top" align="center" style="padding-top: 8px">
-      {attribute_view_gui attribute=$item|attribute('image') image_class=newsletter_content use_colorbox=false()}
+      {attribute_view_gui attribute=$item.data_map.image image_class=newsletter_content use_colorbox=false()}
     </td>
     {/if}
     <td width="{$main_width}" valign="top" align="left">
