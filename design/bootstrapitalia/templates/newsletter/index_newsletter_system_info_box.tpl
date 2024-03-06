@@ -10,14 +10,16 @@
         {foreach $newsletter_list_node_list as $newsletter_list_node}
         <table cellspacing="0" cellpadding="0" class="table table-striped">
             <tr>
-                <th>                    
+                <th>
                     <a href="{$newsletter_list_node.url_alias|ezurl(no)}">{$newsletter_list_node.name|wash()}</a>
                 </th>
                 <th class="text-right">
                     {if $newsletter_list_node.can_edit}
                         <a href="{concat('content/edit/',$newsletter_list_node.contentobject_id, '/f')|ezurl(no)}" class="btn btn-xs btn-warning">Modifica</a>
                     {/if}
-                    <strong><a href="{concat('newsletter/subscription_list/',$newsletter_list_node.node_id)|ezurl(no)}" class="btn btn-xs btn-primary">Utenti iscritti</a></strong>
+                    {if or(ezini_hasvariable('GeneralSettings', 'EnableSendy', 'sendy.ini')|not(), ezini('GeneralSettings', 'EnableSendy', 'sendy.ini')|ne('enabled'))}
+                        <strong><a href="{concat('newsletter/subscription_list/',$newsletter_list_node.node_id)|ezurl(no)}" class="btn btn-xs btn-primary">Utenti iscritti</a></strong>
+                    {/if}
                     {if $newsletter_list_node.can_create}
                     <form action={'content/action'|ezurl()} name="CreateNewNewsletterEdition" method="post" class="d-inline">
                         <input type="hidden" value="{ezini( 'RegionalSettings', 'ContentObjectLocale' )}" name="ContentLanguageCode"/>
@@ -36,13 +38,13 @@
                                                                         hash( 'id', 'CjwNewsletterEditionFilter',
                                                                               'params', hash( 'status', 'draft' ) )
                                                                                  ) )}
-            {if $edition_draft_node_list|count|gt(0)}            
+            {if $edition_draft_node_list|count|gt(0)}
                 {foreach $edition_draft_node_list as $edition_draft_node}
                     <tr>
                         <td>
                             <a href={$edition_draft_node.url_alias|ezurl}>{$edition_draft_node.name|wash()}</a>
                         </td>
-                    
+
                         <td class="text-right">
                             {if $edition_draft_node.can_edit}
                             <form action={'content/action'|ezurl()} method="post">
@@ -60,5 +62,5 @@
             {/if}
             {undef $edition_draft_node_list}
         </table>
-        {/foreach}    
+        {/foreach}
 </div>
