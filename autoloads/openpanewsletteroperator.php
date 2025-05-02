@@ -60,8 +60,8 @@ class OpenPANewsletterOperator
                                         'LoadDataMap' => false,
                                         'ExtendedAttributeFilter' => array(
                                             'id' => 'CjwNewsletterEditionFilter',
-                                            'params' => array('status' => 'draft')
-                                        )
+                                            'params' => array('status' => 'draft'),
+                                        ),
                                     ),
                                     eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
                                 );
@@ -85,26 +85,11 @@ class OpenPANewsletterOperator
 
                 case 'newsletter_edition_hash':
                     {
-                        $editionDraftNodeList = array();
-                        if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
-                            $editionDraftNodeList = (array)eZContentObjectTreeNode::subTreeByNodeID(
-                                array(
-                                    'ClassFilterType' => 'include',
-                                    'ClassFilterArray' => array('cjw_newsletter_edition'),
-                                    'LoadDataMap' => false,
-                                    'ExtendedAttributeFilter' => array(
-                                        'id' => 'CjwNewsletterEditionFilter',
-                                        'params' => array('status' => 'draft')
-                                    )
-                                ),
-                                eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
-                            );
-                        }
+                        $editionDraftNodeList = self::getDraftEditions();
                         $selectHash = array();
                         foreach ($editionDraftNodeList as $edition) {
                             $selectHash[$edition->attribute('node_id')] = $edition->attribute('parent')->attribute('name') . ' ' . $edition->attribute('name');
                         }
-
                         $operatorValue = $selectHash;
                     }
                     break;
@@ -120,8 +105,8 @@ class OpenPANewsletterOperator
                                     'LoadDataMap' => false,
                                     'ExtendedAttributeFilter' => array(
                                         'id' => 'CjwNewsletterListFilter',
-                                        'params' => array('siteaccess' => array('current_siteaccess'))
-                                    )
+                                        'params' => array('siteaccess' => array('current_siteaccess')),
+                                    ),
 
                                 ),
                                 eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
@@ -140,5 +125,26 @@ class OpenPANewsletterOperator
         eZDB::setErrorHandling(eZDB::ERROR_HANDLING_STANDARD);
 
         return true;
+    }
+
+    public static function getDraftEditions(): array
+    {
+        $editionDraftNodeList = array();
+        if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
+            $editionDraftNodeList = (array)eZContentObjectTreeNode::subTreeByNodeID(
+                array(
+                    'ClassFilterType' => 'include',
+                    'ClassFilterArray' => array('cjw_newsletter_edition'),
+                    'LoadDataMap' => false,
+                    'ExtendedAttributeFilter' => array(
+                        'id' => 'CjwNewsletterEditionFilter',
+                        'params' => array('status' => 'draft'),
+                    ),
+                ),
+                eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
+            );
+        }
+
+        return $editionDraftNodeList;
     }
 }

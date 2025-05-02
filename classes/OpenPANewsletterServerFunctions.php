@@ -41,7 +41,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $subscriptionLists = [];
                 if (count($subscribeSettings['ListArray']) > 0) {
                     foreach ($subscribeSettings['ListArray'] as $listSetting) {
-                        list($listId, $listName) = explode(';', $listSetting);
+                        [$listId, $listName] = explode(';', $listSetting);
                         $subscriptionLists[$listId] = $listName;
                     }
                     foreach ($lists as $list) {
@@ -123,7 +123,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         echo json_encode([
             'code' => $responseCode,
             'messages' => $responseMessages,
-            'text' => $responseText
+            'text' => $responseText,
         ]);
         eZExecution::cleanExit();
     }
@@ -152,7 +152,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         }
         $opts = [
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
         ];
         $context = stream_context_create($opts);
         $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/subscribe', false, $context);
@@ -189,7 +189,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         ];
         $opts = [
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
         ];
         $context = stream_context_create($opts);
         $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/subscribers/subscription-status.php', false, $context);
@@ -272,11 +272,11 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
                 $search = [
                     $url . '/newsletter/unsubscribe/#_hash_unsubscribe_#',
-                    str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#'
+                    str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#',
                 ];
                 $replace = [
                     '[unsubscribe]',
-                    '[unsubscribe]'
+                    '[unsubscribe]',
                 ];
                 $text = str_replace($search, $replace, $outputFormatStringArray[0]['body']['text']);
 
@@ -304,7 +304,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 ];
                 $opts = [
                     'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-                    'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)]
+                    'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
                 ];
                 $context = stream_context_create($opts);
                 $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/campaigns/create.php', false, $context);
@@ -328,7 +328,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         echo json_encode([
             'code' => $responseCode,
             'messages' => $responseMessages,
-            'text' => $responseText
+            'text' => $responseText,
         ]);
         eZExecution::cleanExit();
     }
@@ -386,7 +386,26 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         echo json_encode([
             'code' => $responseCode,
             'messages' => $responseMessages,
-            'text' => $responseText
+            'text' => $responseText,
+        ]);
+        eZExecution::cleanExit();
+    }
+
+    public static function getDraftEditions()
+    {
+        $response = [];
+        $list = OpenPANewsletterOperator::getDraftEditions();
+        foreach ($list as $edition) {
+            $response[] = [
+                'node_id' => (int)$edition->attribute('node_id'),
+                'name' => $edition->attribute('name'),
+                'list' => $edition->attribute('parent')->attribute('name'),
+            ];
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'editions' => $response,
         ]);
         eZExecution::cleanExit();
     }
