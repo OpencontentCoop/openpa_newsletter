@@ -20,40 +20,33 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         $missingListText = ezpI18n::tr('openpa_newsletter', 'At least one list must be selected');
 
         try {
-            $ini = eZINI::instance('sendy.ini');
-            $generalSettings = $ini->group('GeneralSettings');
-            if ($generalSettings['EnableSendy'] == 'enabled') {
-
+            $sendy = OpenPASendy::instance();
+            if ($sendy->isEnabled()) {
                 if ($http->hasPostVariable('hp') && $http->postVariable('hp') != '') {
                     throw new Exception("Spam detected");
                 }
 
-                $subscribeSettings = $ini->group('SubscribeSettings');
                 $name = $http->hasPostVariable('name') ? $http->postVariable('name') : false;
                 $email = $http->hasPostVariable('email') ? $http->postVariable('email') : false;
                 $lists = $http->hasPostVariable('list') ? $http->postVariable('list') : false;
                 $gdpr = $http->hasPostVariable('gdpr');
 
-                if (empty($lists)){
+                if (empty($lists)) {
                     throw new InvalidArgumentException($missingListText);
                 }
 
-                $subscriptionLists = [];
-                if (count($subscribeSettings['ListArray']) > 0) {
-                    foreach ($subscribeSettings['ListArray'] as $listSetting) {
-                        [$listId, $listName] = explode(';', $listSetting);
-                        $subscriptionLists[$listId] = $listName;
-                    }
+                $subscriptionLists = $sendy->getListIdNameList();
+                if (count($subscriptionLists) > 0) {
                     foreach ($lists as $list) {
                         if (!isset($subscriptionLists[$list])) {
                             throw new Exception("Invalid list id: $list");
                         }
                     }
-                } elseif ($lists[0] != $subscribeSettings['DefaultListId']) {
+                } elseif ($lists[0] != $sendy->getDefaultListId()) {
                     throw new Exception("Invalid list");
                 }
 
-                if ($subscribeSettings['Gdpr'] == 'true' && !$gdpr) {
+                if ($sendy->useGdpr() && !$gdpr) {
                     throw new Exception("Missing GDPR field");
                 }
 
@@ -84,13 +77,26 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                         } elseif ($status['code'] == self::STATUS_WARNING) {
                             switch ($status['message']) {
                                 case "Unconfirmed":
-                                    $texts[] = ezpI18n::tr('cjw_newsletter/subscribe_success', 'You are registered for our newsletter.') . ' '
-                                        . ezpI18n::tr('cjw_newsletter/subscribe_success', 'An email was sent to your address %email.', null, ['%email' => $email]) . ' '
-                                        . ezpI18n::tr('cjw_newsletter/subscribe_success', 'Please note that your subscription is only active if you clicked confirmation link in these email.');
+                                    $texts[] = ezpI18n::tr(
+                                            'cjw_newsletter/subscribe_success',
+                                            'You are registered for our newsletter.'
+                                        ) . ' '
+                                        . ezpI18n::tr(
+                                            'cjw_newsletter/subscribe_success',
+                                            'An email was sent to your address %email.',
+                                            null,
+                                            ['%email' => $email]
+                                        ) . ' '
+                                        . ezpI18n::tr(
+                                            'cjw_newsletter/subscribe_success',
+                                            'Please note that your subscription is only active if you clicked confirmation link in these email.'
+                                        );
                                     break;
                                 default:
-                                    $texts[] = ezpI18n::tr('openpa_newsletter',
-                                        'There are problems with the email address entered: at this moment the address is in status %status%', '',
+                                    $texts[] = ezpI18n::tr(
+                                        'openpa_newsletter',
+                                        'There are problems with the email address entered: at this moment the address is in status %status%',
+                                        '',
                                         ['%status%' => $status['message']]
                                     );
                             }
@@ -101,9 +107,8 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
                 $responseMessages = $results;
                 if (!empty($texts)) {
-                    $responseText = implode("\n", $texts);
+                    $responseText = implode("<br><br>", $texts);
                 }
-
             } else {
                 throw new Exception('Configuration Error');
             }
@@ -130,32 +135,34 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
     private static function doSubscribe($name, $email, $list)
     {
-        $ini = eZINI::instance('sendy.ini');
-        $generalSettings = $ini->group('GeneralSettings');
-        $subscribeSettings = $ini->group('SubscribeSettings');
+        $sendy = OpenPASendy::instance();
         $postdata = [
             'email' => $email,
             'list' => $list,
-            'api_key' => $generalSettings['ApiKey'],
+            'api_key' => $sendy->getApiKey(),
         ];
         if ($name) {
             $postdata['name'] = $name;
         }
-        if ($subscribeSettings['Gdpr'] == 'true') {
+        if ($sendy->useGdpr() == 'true') {
             $postdata['gdpr'] = 'true';
         }
-        if ($subscribeSettings['Silent'] == 'true') {
+        if ($sendy->isSilent() == 'true') {
             $postdata['silent'] = 'true';
         }
-        if ($subscribeSettings['Boolean'] == 'true') {
+        if ($sendy->useBoolean() == 'true') {
             $postdata['boolean'] = 'true';
         }
         $opts = [
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'content' => http_build_query($postdata),
+            ],
         ];
         $context = stream_context_create($opts);
-        $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/subscribe', false, $context);
+        $response = file_get_contents($sendy->getApiUrl() . '/subscribe', false, $context);
 
         $responseMap = [
             "true" => self::STATUS_SUCCESS,
@@ -180,19 +187,26 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
 
     private static function getSubscriptionStatus($email, $list)
     {
-        $ini = eZINI::instance('sendy.ini');
-        $generalSettings = $ini->group('GeneralSettings');
+        $sendy = OpenPASendy::instance();
         $postdata = [
             'email' => $email,
             'list_id' => $list,
-            'api_key' => $generalSettings['ApiKey'],
+            'api_key' => $sendy->getApiKey(),
         ];
         $opts = [
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-            'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'content' => http_build_query($postdata),
+            ],
         ];
         $context = stream_context_create($opts);
-        $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/subscribers/subscription-status.php', false, $context);
+        $response = file_get_contents(
+            $sendy->getApiUrl() . '/api/subscribers/subscription-status.php',
+            false,
+            $context
+        );
 
         $responseStatusMap = [
             "Subscribed" => self::STATUS_SUCCESS,
@@ -221,15 +235,15 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
     public static function createcampaign()
     {
         $http = eZHTTPTool::instance();
-
-        $ini = eZINI::instance('sendy.ini');
-        $generalSettings = $ini->group('GeneralSettings');
+        $sendy = OpenPASendy::instance();
 
         $responseCode = self::STATUS_SUCCESS;
         $responseMessages = [];
-        $responseText = ezpI18n::tr('openpa_newsletter',
-            "Campaign created successfully: now you can send the newsletter from %sendy_api_url%. After sending it, click on the 'Mark as sent' button to archive this newsletter", '',
-            ['%sendy_api_url%' => $generalSettings['ApiUrl']]
+        $responseText = ezpI18n::tr(
+            'openpa_newsletter',
+            "Campaign created successfully: now you can send the newsletter from %sendy_api_url%. After sending it, click on the 'Mark as sent' button to archive this newsletter",
+            '',
+            ['%sendy_api_url%' => $sendy->getApiUrl()]
         );
         $errorText = ezpI18n::tr('openpa_newsletter', 'Error processing your request: contact support');
 
@@ -239,7 +253,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 throw new Exception('Unauthorized');
             }
 
-            if ($generalSettings['EnableSendy'] == 'enabled') {
+            if ($sendy->isEnabled()) {
                 $attributeId = (int)$http->postVariable('id');
                 $attributeVersion = (int)$http->postVariable('version');
                 $attribute = eZContentObjectAttribute::fetch($attributeId, $attributeVersion);
@@ -255,65 +269,37 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $outputXml = $editionObject->createOutputXml();
 
                 $listAttributeContent = $editionObject->attribute('list_attribute_content');
-                $emailSender = $listAttributeContent->attribute('email_sender');
-                $emailSenderName = $listAttributeContent->attribute('email_sender_name');
-                $emailReplyTo = $listAttributeContent->attribute('email_reply_to');
+                $emailSender = $listAttributeContent->attribute('email_sender') ?? OpenPASMTPTransport::getEmailSenderAddress();
+                $emailSenderName = $listAttributeContent->attribute('email_sender_name') ?? eZINI::instance('SiteSettings', 'SiteName');
+                $emailReplyTo = $listAttributeContent->attribute('email_reply_to') ?? OpenPASMTPTransport::getEmailSenderAddress();
 
                 $sendObject = new CjwNewsletterEditionSend(['output_xml' => $outputXml]);
                 $outputFormatStringArray = $sendObject->getParsedOutputXml();
                 foreach ($outputFormatStringArray as $outputFormatId => $outputFormatNewsletterContentArray) {
                     if ($outputFormatNewsletterContentArray['html_mail_image_include'] == 1) {
-                        $outputFormatStringArray[$outputFormatId] = CjwNewsletterEdition::prepareImageInclude($outputFormatNewsletterContentArray);
+                        $outputFormatStringArray[$outputFormatId] = CjwNewsletterEdition::prepareImageInclude(
+                            $outputFormatNewsletterContentArray
+                        );
                     }
                 }
 
                 $subject = $outputFormatStringArray[0]['subject'];
                 $url = $outputFormatStringArray[0]['ez_url'];
 
-                $search = [
-                    $url . '/newsletter/unsubscribe/#_hash_unsubscribe_#',
-                    str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#',
-                ];
-                $replace = [
-                    '[unsubscribe]',
-                    '[unsubscribe]',
-                ];
-                $text = str_replace($search, $replace, $outputFormatStringArray[0]['body']['text']);
-
-                $search = [
-                    '<a href="' . $url . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</a>',
-                    '<a href="' . str_replace('http', 'https', $url) . '/newsletter/unsubscribe/#_hash_unsubscribe_#' . '">' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</a>',
-                ];
-                $replace = [
-                    '<unsubscribe>' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</unsubscribe>',
-                    '<unsubscribe>' . ezpI18n::tr('openpa_newsletter', 'Unsubscribe') . '</unsubscribe>',
-                ];
-                $html = str_replace($search, $replace, $outputFormatStringArray[0]['body']['html']);
-
-
-                $postdata = [
-                    'from_name' => $emailSenderName,
-                    'from_email' => $emailSender,
-                    'reply_to' => $emailReplyTo,
-                    'title' => $subject,
-                    'subject' => $subject,
-                    'plain_text' => $text,
-                    'html_text' => $html,
-                    'brand_id' => $generalSettings['BrandId'],
-                    'api_key' => $generalSettings['ApiKey'],
-                ];
-                $opts = [
-                    'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
-                    'http' => ['method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata)],
-                ];
-                $context = stream_context_create($opts);
-                $response = file_get_contents(rtrim($generalSettings['ApiUrl'], '/') . '/api/campaigns/create.php', false, $context);
-
-                if (strpos($response, 'Campaign created') === false) {
+                try {
+                    $sendy->createCampaign(
+                        $url,
+                        $emailSenderName,
+                        $emailSender,
+                        $emailReplyTo,
+                        $subject,
+                        $outputFormatStringArray[0]['body']['text'],
+                        $outputFormatStringArray[0]['body']['html']
+                    );
+                } catch (Exception $e) {
                     $responseCode = self::STATUS_ERROR;
-                    $responseText = $response;
+                    $responseText = $e->getMessage();
                 }
-
             } else {
                 throw new Exception('Configuration Error');
             }
@@ -336,9 +322,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
     public static function archive()
     {
         $http = eZHTTPTool::instance();
-
-        $ini = eZINI::instance('sendy.ini');
-        $generalSettings = $ini->group('GeneralSettings');
+        $sendy = OpenPASendy::instance();
 
         $responseCode = self::STATUS_SUCCESS;
         $responseMessages = [];
@@ -351,7 +335,7 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 throw new Exception('Unauthorized');
             }
 
-            if ($generalSettings['EnableSendy'] == 'enabled') {
+            if ($sendy->isEnabled()) {
                 $attributeId = (int)$http->postVariable('id');
                 $attributeVersion = (int)$http->postVariable('version');
                 $attribute = eZContentObjectAttribute::fetch($attributeId, $attributeVersion);
@@ -370,11 +354,9 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $sendObject->setAttribute('status', CjwNewsletterEditionSend::STATUS_MAILQUEUE_PROCESS_FINISHED);
                 $sendObject->store();
                 eZContentCacheManager::clearContentCache($attribute->attribute('contentobject_id'));
-
             } else {
                 throw new Exception('Configuration Error');
             }
-
         } catch (Exception $e) {
             $responseCode = self::STATUS_ERROR;
             $responseMessages = [$e->getMessage()];
@@ -406,6 +388,50 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
         header('Content-Type: application/json');
         echo json_encode([
             'editions' => $response,
+        ]);
+        eZExecution::cleanExit();
+    }
+
+    public static function lists()
+    {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'code' => self::STATUS_SUCCESS,
+            'messages' => OpenPASendy::instance()->getListIdNameList(),
+            'text' => '',
+        ]);
+        eZExecution::cleanExit();
+    }
+
+    public static function createCampaignFromContent($args)
+    {
+        $sendy = OpenPASendy::instance();
+
+        $responseCode = self::STATUS_ERROR;
+        $responseMessages = [];
+        $responseText = 'Configuration Error';
+
+        if ($sendy->isEnabled()) {
+            $object = eZContentObject::fetch((int)$args[0]);
+            $locale = $args[1] ?? null;
+            if ($object instanceof eZContentObject) {
+                if ($sendy->canCreateSingleContentCampaign($object)) {
+                    try {
+                        $sendy->createCreateSingleContentCampaign($object, $locale);
+                        $responseCode = self::STATUS_SUCCESS;
+                        $responseText = '';
+                    } catch (Exception $e) {
+                        $responseText = $e->getMessage();
+                    }
+                }
+            }
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'code' => $responseCode,
+            'messages' => $responseMessages,
+            'text' => $responseText,
         ]);
         eZExecution::cleanExit();
     }
