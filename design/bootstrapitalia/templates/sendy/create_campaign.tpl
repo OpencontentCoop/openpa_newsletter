@@ -2,7 +2,7 @@
     <input type="hidden" name="id" value="{$newsletter_edition_attribute.id}" />
     <input type="hidden" name="version" value="{$newsletter_edition_attribute.version}" />
     <button class="btn btn-success" type="submit">
-        Crea campagna in {ezini('GeneralSettings', 'ApiUrl', 'sendy.ini')}
+        Crea campagna in {sendy_url()}
     </button>
 </form>
 <form id="archive-newsletter" method="POST" accept-charset="utf-8" class="mt-3">

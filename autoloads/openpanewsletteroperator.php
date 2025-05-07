@@ -2,12 +2,27 @@
 
 class OpenPANewsletterOperator
 {
-    public static $allowedClasses = array();
+    public static $allowedClasses = [];
 
     function __construct()
     {
-        $this->Operators = array('can_add_to_newsletter', 'newsletter_edition_hash', 'has_newsletter');
-        self::$allowedClasses = OpenPAINI::variable('NewsletterClasses', 'Classes', array('avviso', 'comunicato_stampa', 'event'));
+        $this->Operators = [
+            'can_add_to_newsletter',
+            'newsletter_edition_hash',
+            'has_newsletter',
+            'is_sendy_enabled',
+            'sendy_url',
+            'sendy_brand_id',
+            'sendy_default_list_id',
+            'sendy_lists',
+            'sendy_use_gdpr',
+            'can_create_sendy_campaign',
+        ];
+        self::$allowedClasses = OpenPAINI::variable(
+            'NewsletterClasses',
+            'Classes',
+            ['avviso', 'comunicato_stampa', 'event']
+        );
     }
 
     function operatorList()
@@ -22,15 +37,28 @@ class OpenPANewsletterOperator
 
     function namedParameterList()
     {
-        return array(
-            'can_add_to_newsletter' => array(
-                'ignore_ini_classes' => array('type' => 'boolean', 'required' => false, 'default' => false),
-            ),
-        );
+        return [
+            'can_add_to_newsletter' => [
+                'ignore_ini_classes' => ['type' => 'boolean', 'required' => false, 'default' => false],
+            ],
+            'can_create_sendy_campaign' => [
+                'object' => ['type' => 'object', 'required' => true, 'default' => null],
+            ],
+            'sendy_url' => [
+                'with_brand' => ['type' => 'boolean', 'required' => false, 'default' => false],
+            ],
+        ];
     }
 
-    function modify(&$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters)
-    {
+    function modify(
+        &$tpl,
+        &$operatorName,
+        &$operatorParameters,
+        &$rootNamespace,
+        &$currentNamespace,
+        &$operatorValue,
+        &$namedParameters
+    ) {
         if (!eZContentClass::classIDByIdentifier('cjw_newsletter_edition')) {
             return false;
         }
@@ -38,8 +66,38 @@ class OpenPANewsletterOperator
         eZDB::setErrorHandling(eZDB::ERROR_HANDLING_EXCEPTIONS);
 
         try {
-
             switch ($operatorName) {
+                case 'can_create_sendy_campaign':
+                    $operatorValue = OpenPASendy::instance()->canCreateSingleContentCampaign($namedParameters['object']);
+                    break;
+
+                case 'sendy_lists':
+                    $operatorValue = OpenPASendy::instance()->getListIdNameList();
+                    break;
+
+                case 'sendy_default_list_id':
+                    $operatorValue = OpenPASendy::instance()->getDefaultListId();
+                    break;
+
+                case 'sendy_use_gdpr':
+                    $operatorValue = OpenPASendy::instance()->useGdpr();
+                    break;
+
+                case 'sendy_brand_id':
+                    $operatorValue = OpenPASendy::instance()->getBrandId();
+                    break;
+
+                case 'sendy_url':
+                    if ($namedParameters['with_brand']) {
+                        $operatorValue = OpenPASendy::instance()->getApiUrl() . '/app?i=' . OpenPASendy::instance()->getBrandId();
+                    }else {
+                        $operatorValue = parse_url(OpenPASendy::instance()->getApiUrl(), PHP_URL_HOST);
+                    }
+                    break;
+
+                case 'is_sendy_enabled':
+                    $operatorValue = OpenPASendy::instance()->isEnabled();
+                    break;
 
                 case 'can_add_to_newsletter':
                     {
@@ -52,20 +110,25 @@ class OpenPANewsletterOperator
                             $checkAccess = $result['accessWord'] != 'no';
 
                             $editionDraftCount = 0;
-                            if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
+                            if (eZINI::instance('cjw_newsletter.ini')->hasVariable(
+                                'NewsletterSettings',
+                                'RootFolderNodeId'
+                            )) {
                                 $editionDraftCount = eZContentObjectTreeNode::subTreeCountByNodeID(
-                                    array(
+                                    [
                                         'ClassFilterType' => 'include',
-                                        'ClassFilterArray' => array('cjw_newsletter_edition'),
+                                        'ClassFilterArray' => ['cjw_newsletter_edition'],
                                         'LoadDataMap' => false,
-                                        'ExtendedAttributeFilter' => array(
+                                        'ExtendedAttributeFilter' => [
                                             'id' => 'CjwNewsletterEditionFilter',
-                                            'params' => array('status' => 'draft'),
-                                        ),
-                                    ),
-                                    eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
+                                            'params' => ['status' => 'draft'],
+                                        ],
+                                    ],
+                                    eZINI::instance('cjw_newsletter.ini')->variable(
+                                        'NewsletterSettings',
+                                        'RootFolderNodeId'
+                                    )
                                 );
-
                             }
                             if ($namedParameters['ignore_ini_classes']) {
                                 $classAllowed = true;
@@ -86,9 +149,11 @@ class OpenPANewsletterOperator
                 case 'newsletter_edition_hash':
                     {
                         $editionDraftNodeList = self::getDraftEditions();
-                        $selectHash = array();
+                        $selectHash = [];
                         foreach ($editionDraftNodeList as $edition) {
-                            $selectHash[$edition->attribute('node_id')] = $edition->attribute('parent')->attribute('name') . ' ' . $edition->attribute('name');
+                            $selectHash[$edition->attribute('node_id')] = $edition->attribute('parent')->attribute(
+                                    'name'
+                                ) . ' ' . $edition->attribute('name');
                         }
                         $operatorValue = $selectHash;
                     }
@@ -96,24 +161,33 @@ class OpenPANewsletterOperator
 
                 case 'has_newsletter':
                     {
-                        $listNodeCount = 0;
-                        if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
-                            $listNodeCount = eZContentObjectTreeNode::subTreeCountByNodeID(
-                                array(
-                                    'ClassFilterType' => 'include',
-                                    'ClassFilterArray' => array('cjw_newsletter_list'),
-                                    'LoadDataMap' => false,
-                                    'ExtendedAttributeFilter' => array(
-                                        'id' => 'CjwNewsletterListFilter',
-                                        'params' => array('siteaccess' => array('current_siteaccess')),
-                                    ),
+                        if (OpenPASendy::instance()->isEnabled()){
+                            $operatorValue = count(OpenPASendy::instance()->getListIdNameList()) > 0;
+                        }else {
+                            $listNodeCount = 0;
+                            if (eZINI::instance('cjw_newsletter.ini')->hasVariable(
+                                'NewsletterSettings',
+                                'RootFolderNodeId'
+                            )) {
+                                $listNodeCount = eZContentObjectTreeNode::subTreeCountByNodeID(
+                                    [
+                                        'ClassFilterType' => 'include',
+                                        'ClassFilterArray' => ['cjw_newsletter_list'],
+                                        'LoadDataMap' => false,
+                                        'ExtendedAttributeFilter' => [
+                                            'id' => 'CjwNewsletterListFilter',
+                                            'params' => ['siteaccess' => ['current_siteaccess']],
+                                        ],
 
-                                ),
-                                eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
-                            );
+                                    ],
+                                    eZINI::instance('cjw_newsletter.ini')->variable(
+                                        'NewsletterSettings',
+                                        'RootFolderNodeId'
+                                    )
+                                );
+                            }
+                            $operatorValue = $listNodeCount > 0;
                         }
-
-                        $operatorValue = $listNodeCount > 0;
                     }
                     break;
             }
@@ -129,18 +203,18 @@ class OpenPANewsletterOperator
 
     public static function getDraftEditions(): array
     {
-        $editionDraftNodeList = array();
+        $editionDraftNodeList = [];
         if (eZINI::instance('cjw_newsletter.ini')->hasVariable('NewsletterSettings', 'RootFolderNodeId')) {
             $editionDraftNodeList = (array)eZContentObjectTreeNode::subTreeByNodeID(
-                array(
+                [
                     'ClassFilterType' => 'include',
-                    'ClassFilterArray' => array('cjw_newsletter_edition'),
+                    'ClassFilterArray' => ['cjw_newsletter_edition'],
                     'LoadDataMap' => false,
-                    'ExtendedAttributeFilter' => array(
+                    'ExtendedAttributeFilter' => [
                         'id' => 'CjwNewsletterEditionFilter',
-                        'params' => array('status' => 'draft'),
-                    ),
-                ),
+                        'params' => ['status' => 'draft'],
+                    ],
+                ],
                 eZINI::instance('cjw_newsletter.ini')->variable('NewsletterSettings', 'RootFolderNodeId')
             );
         }
