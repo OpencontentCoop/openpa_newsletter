@@ -78,6 +78,7 @@ class OpenPACampaignFromContentBuilder
                 $body = implode(' ', $localizeBodies);
                 $body = str_replace(['<h4', '<h5', '<h6'], '<h3', $body);
                 $body = str_replace(['</h4>', '</h5>', '</h6>'], '</h3>', $body);
+                $body = strip_tags($body, '<h1><h2><h3><p><a><ul><li><b><strong><em>');
                 $bodies[] = $body;
             }
         }
@@ -97,19 +98,15 @@ class OpenPACampaignFromContentBuilder
 
         if (count($attachments) > 0) {
             $attachString = [];
-            $attachString[] = '<ul>';
             foreach ($attachments as $attachment) {
                 if (!isset($attachment['url'])){
-                    $attachString[] = '<li>';
-                    $attachString[] = '<h2>' . $attachment['label'] . '</h2>';
-                    $attachString[] = '</li>';
+                    $attachString[] = '<h3>' . $attachment['label'] . '</h3>';
                 }else {
-                    $attachString[] = '<li>';
+                    $attachString[] = '<p>';
                     $attachString[] = '<a href="' . $attachment['url'] . '">' . $attachment['label'] . '</a>';
-                    $attachString[] = '</li>';
+                    $attachString[] = '</p>';
                 }
             }
-            $attachString[] = '</ul>';
             $bodies[] = implode('', $attachString);
         }
 
@@ -124,7 +121,7 @@ class OpenPACampaignFromContentBuilder
                     $host = eZSys::serverProtocol() . "://" . $host;
                     $bodies[] = '<a href="' . $host . '/' .
                         eZURLAliasML::cleanURL('content/view/full/' . $this->object->mainNodeID()) .
-                    '">' . ezpI18n::tr('bootstrapitalia', 'Read more') . '</a>';
+                    '">Link</a>';
                     break;
                 }
             }
