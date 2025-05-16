@@ -33,7 +33,7 @@
                                 <h6 class="link-list-heading mb-0 font-weight-bold">{$newsletter_list_node.name|wash()}</h6>
                                 {if $newsletter_list_node.can_create}
                                     <form action="{'content/action'|ezurl(no)}" name="CreateNewNewsletterEdition" method="post" class="d-inline">
-                                        <input type="hidden" value="{ezini( 'RegionalSettings', 'ContentObjectLocale' )}" name="ContentLanguageCode"/>
+                                        <input type="hidden" value="{$newsletter_list_node.object.initial_language_code}" name="ContentLanguageCode"/>
                                         <input type="hidden" value="{$newsletter_list_node.node_id}" name="ContentNodeID"/>
                                         <input type="hidden" value="{$newsletter_list_node.node_id}" name="NodeID"/>
                                         <input type="hidden" value="cjw_newsletter_edition" name="ClassIdentifier"/>
@@ -67,7 +67,7 @@
                                                         <input type="hidden" value="{$edition_draft_node.node_id}" name="ContentNodeID"/>
                                                         <input type="hidden" value="{$edition_draft_node.contentobject_id}" name="ContentObjectID" />
                                                         <input type="hidden" value="{'newsletter/index'}" name="RedirectIfDiscarded" />
-                                                        <input type="hidden" value="{ezini( 'RegionalSettings', 'ContentObjectLocale' )}" name="ContentLanguageCode"/>
+                                                        <input type="hidden" value="{$edition_draft_node.object.initial_language_code}" name="ContentObjectLanguageCode"/>
                                                         <input type="hidden" value="/newsletter/index" name="RedirectURIAfterPublish"/>
                                                         <input type="hidden" value="/newsletter/index" name="RedirectIfDiscarded"/>
                                                         <button class="btn btn-link p-0" type="submit" name="EditButton" title="{'Edit newsletter'|i18n( 'cjw_newsletter/index' )}" aria-label="{'Edit newsletter'|i18n( 'cjw_newsletter/index' )}">
@@ -193,7 +193,7 @@
                                                     <input type="hidden" value="{$newsletter_list_node.node_id}" name="ContentNodeID"/>
                                                     <input type="hidden" value="{$newsletter_list_node.contentobject_id}" name="ContentObjectID" />
                                                     <input type="hidden" value="{'newsletter/index'}" name="RedirectIfDiscarded" />
-                                                    <input type="hidden" value="{ezini( 'RegionalSettings', 'ContentObjectLocale' )}" name="ContentLanguageCode"/>
+                                                    <input type="hidden" value="{$newsletter_list_node.object.initial_language_code}" name="ContentObjectLanguageCode"/>
                                                     <input type="hidden" value="/newsletter/index" name="RedirectURIAfterPublish"/>
                                                     <input type="hidden" value="/newsletter/index" name="RedirectIfDiscarded"/>
                                                     <button class="btn btn-link p-0" type="submit" name="EditButton" title="{'Edit newsletter'|i18n( 'cjw_newsletter/index' )}" aria-label="{'Edit newsletter'|i18n( 'cjw_newsletter/index' )}">
