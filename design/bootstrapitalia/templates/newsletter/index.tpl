@@ -237,9 +237,9 @@
                 <div class="card-body">
                     <h3 class="card-title h5">Liste di sottoscrizione</h3>
                     <p class="card-text font-serif">
-                        Seleziona le liste a cui gli utenti possono iscriversi e che compariranno nella <a href="{'newsletter/subscribe'}">pagina di iscrizione</a>.
-                        Le liste sono ottenute dal <a href="https://{sendy_url()}/list?i={sendy_brand_id()}" target="_blank">sistema di invio {sendy_url()}</a><br>
-                        Per ciascuna lista puoi specificare la descrizione che verrà visualizzata nel form di sottoscrizione
+                        Seleziona le liste a cui gli utenti possono iscriversi e che compariranno nella <a href="{'newsletter/subscribe'|ezurl(no)}" target="_blank">pagina di iscrizione <i class="fa fa-external-link"></i></a>.
+                        Le liste sono ottenute dal <a href="https://{sendy_url()}/list?i={sendy_brand_id()}" target="_blank">sistema di invio {sendy_url()} <i class="fa fa-external-link"></i></a><br>
+                        Per ciascuna lista puoi specificare il titolo che verrà visualizzata nel form di sottoscrizione
                     </p>
                     <div id="lists" class="alpaca-field-table"></div>
                     <a class="read-more" href="https://{sendy_url()}/list?i={sendy_brand_id()}" target="_blank">

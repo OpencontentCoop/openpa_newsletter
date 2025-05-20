@@ -51,7 +51,7 @@ class OpenPANewsletterListConnector extends AbstractBaseConnector
                             ],
                             'label' => [
                                 'type' => 'string',
-                                'title' => 'Descrizione',
+                                'title' => 'Titolo',
                                 'required' => true,
                             ],
                             'enabled' => [
