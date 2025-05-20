@@ -33,26 +33,55 @@
     </div>
     <div class="row">        
         <div class="col-lg-12 pb-lg-2">
-            <h1>
-                {$node.name|wash()}
-                <small class="badge bg-info" style="font-size:.7em">
-                    {switch match=$newsletter_edition_status}
-                    {case match='draft'}
-                        In lavorazione
-                    {/case}
-                    {case match='process'}
-                        In lavorazione
-                    {/case}
-                    {case match='archive'}
-                        Archiviata il {cond( $archived_at|gt(0), $archived_at|l10n( shortdatetime ), '' )}
-                    {/case}
-                    {case match='abort'}
-                        Archiviata il {cond( $archived_at|gt(0), $archived_at|l10n( shortdatetime ), '' )}
-                    {/case}
-                    {case}{/case}
-                    {/switch}
-                </small>
-            </h1>
+            <div class="row">
+                <div class="col-11">
+                    <h1>
+                        {$node.name|wash()}
+                        <small class="badge bg-info" style="font-size:.7em">
+                            {switch match=$newsletter_edition_status}
+                            {case match='draft'}
+                                In lavorazione
+                            {/case}
+                            {case match='process'}
+                                In lavorazione
+                            {/case}
+                            {case match='archive'}
+                                Archiviata il {cond( $archived_at|gt(0), $archived_at|l10n( shortdatetime ), '' )}
+                            {/case}
+                            {case match='abort'}
+                                Archiviata il {cond( $archived_at|gt(0), $archived_at|l10n( shortdatetime ), '' )}
+                            {/case}
+                            {case}{/case}
+                            {/switch}
+                        </small>
+                    </h1>
+                </div>
+                {if and($newsletter_edition_status|eq('draft'), is_sendy_enabled())}
+                <div class="col-1 d-flex align-items-center">
+                    <form class="sendy-create" method="POST" accept-charset="utf-8">
+                        <input type="hidden" name="id" value="{$newsletter_edition_attribute.id}" />
+                        <input type="hidden" name="version" value="{$newsletter_edition_attribute.version}" />
+                        <button class="btn btn-link p-0 btn-lg" type="submit" title="Crea campagna in {sendy_url()}">
+                            <span class="fa-stack">
+                              <i class="fa fa-square fa-stack-2x text-primary"></i>
+                              <i class="fa fa-paper-plane fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </button>
+                    </form>
+                    <form class="archive-newsletter" method="POST" accept-charset="utf-8">
+                        <input type="hidden" name="id" value="{$newsletter_edition_attribute.id}" />
+                        <input type="hidden" name="version" value="{$newsletter_edition_attribute.version}" />
+                        <button class="btn btn-link p-0 btn-lg" type="submit" title="Archivia">
+                            <span class="fa-stack">
+                              <i class="fa fa-square fa-stack-2x text-danger"></i>
+                              <i class="fa fa-archive fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+                {/if}
+            </div>
+
             {if $node|has_attribute('short_description')}
                 <div class="lead">{attribute_view_gui attribute=$node|attribute('short_description')}</div>
             {/if}
@@ -87,6 +116,8 @@
     </div>
 </section>
 
+<hr>
+
 <section class="container mb-5">
     <div class="row">
         <div class="col-12 col-sm-12 col-md-6">
@@ -118,4 +149,34 @@
             content: "";
         }
     </style>
+    <script>
+      $(document).ready(function () {
+        $('.sendy-create').on('submit', function (e) {
+          var form = $(this);
+          var original = form.html()
+          var data = form.serializeArray();
+          form.html('<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>');
+          $.ez('newsletter::createcampaign', data, function (response) {
+            alert(response.text)
+            form.html(original)
+          });
+          e.preventDefault();
+        });
+        $('.archive-newsletter').on('submit', function (e) {
+          var form = $(this);
+          var original = form.html()
+          var data = form.serializeArray();
+          form.html('<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>');
+          $.ez('newsletter::archive', data, function (response) {
+            if (response.code === 'danger'){
+              alert(response.text)
+              form.html(original)
+            }else{
+              location.reload()
+            }
+          });
+          e.preventDefault();
+        });
+      });
+    </script>
 {/literal}

@@ -172,8 +172,8 @@
                 <div class="card-body">
                     <h3 class="card-title h5">Modelli di newsletter</h3>
                     <p class="card-text font-serif">
-                        Un modello di newsletter permette di creare il layout di base per ciascuna edizione: dalle informazioni del modello vengono ricavati il titolo, l'immagine della testata e i link del piè di pagina.
-                        Il logo e la palette di colori sono invece ricavati dalle impostazioni del sito.
+                        Qui puoi inserire nuove newsletter e personalizzare il layout di base per ciascuna: titolo, immagine della testata e link del piè di pagina; il logo e la palette di colori sono invece ricavati dalle impostazioni del sito.
+                        Puoi accedere da qui anche alla lista delle edizioni archiviate.
                     </p>
                     <div class="it-list-wrapper">
                         <ul class="it-list">
