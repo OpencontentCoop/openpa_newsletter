@@ -6,6 +6,8 @@ class OpenPASendy
 
     const STORAGE_BRAND_ID = 'sendy_brand_id';
 
+    const STORAGE_SINGLE_CAMPAIGN = 'sendy_single_campaign';
+
     private static $instance;
 
     const SENDY_VERSION = '4.0.6';
@@ -69,6 +71,15 @@ class OpenPASendy
     public function isEnabled(): bool
     {
         return !empty($this->getBrandId()) && !empty($this->getApiKey());
+    }
+
+    public static function setSingleCampaignCreation(bool $enabled): void
+    {
+        if ($enabled) {
+            self::instance()->setStorage(self::STORAGE_SINGLE_CAMPAIGN, 1);
+        } else {
+            self::instance()->removeStorage(self::STORAGE_SINGLE_CAMPAIGN);
+        }
     }
 
     public function getDefaultListId()
@@ -271,13 +282,13 @@ class OpenPASendy
         );
     }
 
-    public function canCreateSingleContentCampaign(
-        $object
-    ): bool {
+    public function canCreateSingleContentCampaign($object = null): bool {
         if (self::isBootstrapItalia2Design()) {
-            if ($object instanceof eZContentObject) {
-                return (new OpenPACampaignFromContentBuilder($object))->canCreate();
+            $canCreate = $this->getStorage(self::STORAGE_SINGLE_CAMPAIGN);
+            if ($canCreate && $object instanceof eZContentObject) {
+                $canCreate = (new OpenPACampaignFromContentBuilder($object))->canCreate();
             }
+            return $canCreate;
         }
         return false;
     }

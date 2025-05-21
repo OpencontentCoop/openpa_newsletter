@@ -42,7 +42,7 @@ class OpenPANewsletterOperator
                 'ignore_ini_classes' => ['type' => 'boolean', 'required' => false, 'default' => false],
             ],
             'can_create_sendy_campaign' => [
-                'object' => ['type' => 'object', 'required' => true, 'default' => null],
+                'object' => ['type' => 'object', 'required' => false, 'default' => null],
             ],
             'sendy_url' => [
                 'with_brand' => ['type' => 'boolean', 'required' => false, 'default' => false],
