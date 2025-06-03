@@ -193,7 +193,7 @@ class OpenPASendy
             ];
         }
 
-        return array_keys($subscriptionLists);
+        return array_values($subscriptionLists);
     }
 
     public function createCampaign(
