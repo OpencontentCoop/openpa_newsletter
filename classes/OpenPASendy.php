@@ -125,6 +125,7 @@ class OpenPASendy
             if (!$lists) {
                 $lists = $this->initStorageLists();
             }
+            // @phpstan-ignore property.notFound
             $this->lists = (array)json_decode($lists, true);
         }
 //        $remoteLists = (array)$this->getRemoteLists();
