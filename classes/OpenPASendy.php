@@ -270,6 +270,7 @@ class OpenPASendy
         string $language = null
     ) {
         $url = 'https://' . eZINI::instance()->variable('SiteSettings', 'SiteURL');
+        // @phpstan-ignore staticMethod.notFound
         $address = OpenPASMTPTransport::getEmailSenderAddress();
         $builder = new OpenPACampaignFromContentBuilder($contentObject, $language);
         $this->createCampaign(

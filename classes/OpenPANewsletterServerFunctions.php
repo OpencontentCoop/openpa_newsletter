@@ -269,8 +269,11 @@ class OpenPANewsletterServerFunctions extends ezjscServerFunctions
                 $outputXml = $editionObject->createOutputXml();
 
                 $listAttributeContent = $editionObject->attribute('list_attribute_content');
+                // @phpstan-ignore staticMethod.notFound
                 $emailSender = $listAttributeContent->attribute('email_sender') ?? OpenPASMTPTransport::getEmailSenderAddress();
+                // @phpstan-ignore staticMethod.notFound
                 $emailSenderName = $listAttributeContent->attribute('email_sender_name') ?? eZINI::instance('SiteSettings', 'SiteName');
+                // @phpstan-ignore staticMethod.notFound
                 $emailReplyTo = $listAttributeContent->attribute('email_reply_to') ?? OpenPASMTPTransport::getEmailSenderAddress();
 
                 $sendObject = new CjwNewsletterEditionSend(['output_xml' => $outputXml]);
